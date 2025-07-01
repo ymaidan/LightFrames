@@ -50,7 +50,7 @@
 - All components in one file for simplicity
 - All state management in one file
 
-### Documentation (3 files)
+### Documentation 
 
 **docs/README.md** - Complete framework documentation
 **docs/API.md** - API reference

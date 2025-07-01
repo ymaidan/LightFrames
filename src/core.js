@@ -1,0 +1,311 @@
+// Constants for different types of nodes
+const NODE_TYPES = {
+    ELEMENT: 'element',
+    TEXT: 'text',
+    COMPONENT: 'component'
+  };
+  
+
+  // VIRTUAL DOM CREATION
+
+  /**
+   * Creates a virtual DOM node
+   * @param {string} tag - HTML tag name (e.g., 'div', 'span')
+   * @param {object} attrs - HTML attributes (e.g., {class: 'container', id: 'main'})
+   * @param {array} children - Child nodes (can be strings, elements, or other virtual nodes)
+   * @returns {object} Virtual DOM node object
+   */
+  function createVNode(tag, attrs = {}, children = []) {
+    return {
+      type: NODE_TYPES.ELEMENT,
+      tag: tag,
+      attrs: attrs,
+      children: children,
+      key: attrs.key || null // For efficient list updates
+    };
+  }
+  
+  /**
+   * Creates a text node
+   * @param {string} text - Text content
+   * @returns {object} Virtual text node object
+   */
+  function createTextNode(text) {
+    return {
+      type: NODE_TYPES.TEXT,
+      text: text
+    };
+  }
+  
+  /**
+   * Checks if an object is a virtual DOM node
+   * @param {any} node - Object to check
+   * @returns {boolean} True if it's a virtual node
+   */
+  function isVNode(node) {
+    return node && typeof node === 'object' && (node.type === NODE_TYPES.ELEMENT || node.type === NODE_TYPES.TEXT);
+  }
+
+  // DOM RENDERING
+
+  /**
+   * Creates a real DOM element from a virtual DOM node
+   * @param {object} vNode - Virtual DOM node
+   * @returns {HTMLElement|Text} Real DOM element
+   */
+  function createDOMElement(vNode) {
+    // Handle text nodes
+    if (vNode.type === NODE_TYPES.TEXT) {
+      return document.createTextNode(vNode.text);
+    }
+    
+    // Handle element nodes
+    if (vNode.type === NODE_TYPES.ELEMENT) {
+      // Create the element
+      const element = document.createElement(vNode.tag);
+      
+      // Set attributes
+      setAttributes(element, vNode.attrs);
+      
+      // Add children
+      vNode.children.forEach(child => {
+        if (typeof child === 'string') {
+          // If child is a string, create a text node
+          element.appendChild(document.createTextNode(child));
+        } else if (isVNode(child)) {
+          // If child is a virtual node, recursively create DOM element
+          element.appendChild(createDOMElement(child));
+        }
+      });
+      
+      return element;
+    }
+    
+    throw new Error(`Unknown node type: ${vNode.type}`);
+  }
+  
+  /**
+   * Sets attributes on a DOM element
+   * @param {HTMLElement} element - DOM element
+   * @param {object} attrs - Attributes object
+   */
+  function setAttributes(element, attrs) {
+    Object.keys(attrs).forEach(key => {
+      if (key === 'key') return; // Skip key attribute (used for diffing)
+      
+      if (key.startsWith('on')) {
+        // Handle event listeners (e.g., onClick, onInput)
+        const eventName = key.toLowerCase().substring(2); // 'onClick' -> 'click'
+        element.addEventListener(eventName, attrs[key]);
+      } else {
+        // Handle regular attributes
+        element.setAttribute(key, attrs[key]);
+      }
+    });
+  }
+  
+  /**
+   * Renders virtual DOM to a container
+   * @param {object} vNode - Virtual DOM node to render
+   * @param {HTMLElement} container - Container element
+   */
+  function render(vNode, container) {
+    // Clear the container
+    container.innerHTML = '';
+    
+    // Create and append the DOM element
+    const domElement = createDOMElement(vNode);
+    container.appendChild(domElement);
+  }
+  
+
+  // DIFFING ALGORITHM
+
+  /**
+   * Compares two virtual DOM trees and returns patches
+   * @param {object} oldVNode - Old virtual DOM node
+   * @param {object} newVNode - New virtual DOM node
+   * @returns {array} Array of patches to apply
+   */
+  function diff(oldVNode, newVNode) {
+    const patches = [];
+    
+    // If one of the nodes is null/undefined
+    if (!oldVNode && newVNode) {
+      patches.push({ type: 'REPLACE', newNode: newVNode });
+      return patches;
+    }
+    
+    if (oldVNode && !newVNode) {
+      patches.push({ type: 'REMOVE' });
+      return patches;
+    }
+    
+    // If both nodes are text nodes
+    if (oldVNode.type === NODE_TYPES.TEXT && newVNode.type === NODE_TYPES.TEXT) {
+      if (oldVNode.text !== newVNode.text) {
+        patches.push({ type: 'REPLACE', newNode: newVNode });
+      }
+      return patches;
+    }
+    
+    // If nodes have different types
+    if (oldVNode.type !== newVNode.type || oldVNode.tag !== newVNode.tag) {
+      patches.push({ type: 'REPLACE', newNode: newVNode });
+      return patches;
+    }
+    
+    // Compare attributes
+    const attrPatches = diffAttributes(oldVNode.attrs, newVNode.attrs);
+    if (attrPatches.length > 0) {
+      patches.push({ type: 'UPDATE_ATTRS', patches: attrPatches });
+    }
+    
+    // Compare children
+    const childPatches = diffChildren(oldVNode.children, newVNode.children);
+    if (childPatches.length > 0) {
+      patches.push({ type: 'UPDATE_CHILDREN', patches: childPatches });
+    }
+    
+    return patches;
+  }
+  
+  /**
+   * Compares attributes of two nodes
+   * @param {object} oldAttrs - Old attributes
+   * @param {object} newAttrs - New attributes
+   * @returns {array} Attribute patches
+   */
+  function diffAttributes(oldAttrs, newAttrs) {
+    const patches = [];
+    const allKeys = new Set([...Object.keys(oldAttrs), ...Object.keys(newAttrs)]);
+    
+    allKeys.forEach(key => {
+      if (key === 'key') return; // Skip key attribute
+      
+      if (!(key in oldAttrs)) {
+        // New attribute
+        patches.push({ type: 'SET_ATTR', key, value: newAttrs[key] });
+      } else if (!(key in newAttrs)) {
+        // Removed attribute
+        patches.push({ type: 'REMOVE_ATTR', key });
+      } else if (oldAttrs[key] !== newAttrs[key]) {
+        // Changed attribute
+        patches.push({ type: 'SET_ATTR', key, value: newAttrs[key] });
+      }
+    });
+    
+    return patches;
+  }
+  
+  /**
+   * Compares children of two nodes
+   * @param {array} oldChildren - Old children
+   * @param {array} newChildren - New children
+   * @returns {array} Children patches
+   */
+  function diffChildren(oldChildren, newChildren) {
+    const patches = [];
+    const maxLength = Math.max(oldChildren.length, newChildren.length);
+    
+    for (let i = 0; i < maxLength; i++) {
+      const oldChild = oldChildren[i];
+      const newChild = newChildren[i];
+      
+      if (!oldChild && newChild) {
+        // New child
+        patches.push({ type: 'ADD_CHILD', index: i, child: newChild });
+      } else if (oldChild && !newChild) {
+        // Removed child
+        patches.push({ type: 'REMOVE_CHILD', index: i });
+      } else if (oldChild && newChild) {
+        // Compare children recursively
+        const childPatches = diff(oldChild, newChild);
+        if (childPatches.length > 0) {
+          patches.push({ type: 'UPDATE_CHILD', index: i, patches: childPatches });
+        }
+      }
+    }
+    
+    return patches;
+  }
+  
+
+
+  // PATCHING (APPLYING CHANGES)
+  /**
+   * Applies patches to a DOM element
+   * @param {HTMLElement} element - DOM element to patch
+   * @param {array} patches - Array of patches to apply
+   */
+  function patch(element, patches) {
+    patches.forEach(patch => {
+      switch (patch.type) {
+        case 'REPLACE':
+          const newElement = createDOMElement(patch.newNode);
+          element.parentNode.replaceChild(newElement, element);
+          break;
+          
+        case 'REMOVE':
+          element.parentNode.removeChild(element);
+          break;
+          
+        case 'UPDATE_ATTRS':
+          patch.patches.forEach(attrPatch => {
+            switch (attrPatch.type) {
+              case 'SET_ATTR':
+                if (attrPatch.key.startsWith('on')) {
+                  const eventName = attrPatch.key.toLowerCase().substring(2);
+                  element.addEventListener(eventName, attrPatch.value);
+                } else {
+                  element.setAttribute(attrPatch.key, attrPatch.value);
+                }
+                break;
+              case 'REMOVE_ATTR':
+                element.removeAttribute(attrPatch.key);
+                break;
+            }
+          });
+          break;
+          
+        case 'UPDATE_CHILDREN':
+          patch.patches.forEach(childPatch => {
+            switch (childPatch.type) {
+              case 'ADD_CHILD':
+                const childElement = createDOMElement(childPatch.child);
+                element.appendChild(childElement);
+                break;
+              case 'REMOVE_CHILD':
+                if (element.children[childPatch.index]) {
+                  element.removeChild(element.children[childPatch.index]);
+                }
+                break;
+              case 'UPDATE_CHILD':
+                patch(element.children[childPatch.index], childPatch.patches);
+                break;
+            }
+          });
+          break;
+      }
+    });
+  }
+  
+
+  // PUBLIC API - Make functions available globally
+  window.MiniFramework = {
+    // Virtual DOM
+    createVNode,
+    createTextNode,
+    isVNode,
+    
+    // Rendering
+    createDOMElement,
+    render,
+    
+    // Diffing and Patching
+    diff,
+    patch,
+    
+    // Constants
+    NODE_TYPES
+  };
