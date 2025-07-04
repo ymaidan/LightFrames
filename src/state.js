@@ -1,4 +1,3 @@
-
 // Private variables to store our state and subscribers
 let currentState = {};
 let stateChangeListeners = [];
@@ -162,16 +161,9 @@ function createAutoRenderingComponent(renderFunction, container) {
   // Function to render the component
   function renderComponent() {
     const newVNode = renderFunction(getCurrentState());
-    
-    if (currentVNode) {
-      // If we already have a rendered component, use diffing to update
-      const patches = diff(currentVNode, newVNode);
-      patch(container.firstChild, patches);
-    } else {
-      // First render
-      render(newVNode, container);
-    }
-    
+    // Always do a full re-render for testing
+    container.innerHTML = '';
+    render(newVNode, container);
     currentVNode = newVNode;
   }
   

@@ -177,6 +177,8 @@ const NODE_TYPES = {
    * @returns {array} Attribute patches
    */
   function diffAttributes(oldAttrs, newAttrs) {
+    oldAttrs = oldAttrs || {};
+    newAttrs = newAttrs || {};
     const patches = [];
     const allKeys = new Set([...Object.keys(oldAttrs), ...Object.keys(newAttrs)]);
     
