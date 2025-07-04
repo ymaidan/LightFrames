@@ -15,7 +15,7 @@ const NODE_TYPES = {
    * @param {array} children - Child nodes (can be strings, elements, or other virtual nodes)
    * @returns {object} Virtual DOM node object
    */
-  function createVNode(tag, attrs = {}, children = []) {
+  function createVirtualNode(tag, attrs = {}, children = []) {
     return {
       type: NODE_TYPES.ELEMENT,
       tag: tag,
@@ -30,7 +30,7 @@ const NODE_TYPES = {
    * @param {string} text - Text content
    * @returns {object} Virtual text node object
    */
-  function createTextNode(text) {
+  function createVirtualText(text) {
     return {
       type: NODE_TYPES.TEXT,
       text: text
@@ -42,7 +42,7 @@ const NODE_TYPES = {
    * @param {any} node - Object to check
    * @returns {boolean} True if it's a virtual node
    */
-  function isVNode(node) {
+  function isVirtualNode(node) {
     return node && typeof node === 'object' && (node.type === NODE_TYPES.ELEMENT || node.type === NODE_TYPES.TEXT);
   }
 
@@ -53,7 +53,7 @@ const NODE_TYPES = {
    * @param {object} vNode - Virtual DOM node
    * @returns {HTMLElement|Text} Real DOM element
    */
-  function createDOMElement(vNode) {
+  function createRealElement(vNode) {
     // Handle text nodes
     if (vNode.type === NODE_TYPES.TEXT) {
       return document.createTextNode(vNode.text);
@@ -65,16 +65,16 @@ const NODE_TYPES = {
       const element = document.createElement(vNode.tag);
       
       // Set attributes
-      setAttributes(element, vNode.attrs);
+      setElementAttributes(element, vNode.attrs);
       
       // Add children
       vNode.children.forEach(child => {
         if (typeof child === 'string') {
           // If child is a string, create a text node
           element.appendChild(document.createTextNode(child));
-        } else if (isVNode(child)) {
+        } else if (isVirtualNode(child)) {
           // If child is a virtual node, recursively create DOM element
-          element.appendChild(createDOMElement(child));
+          element.appendChild(createRealElement(child));
         }
       });
       
@@ -89,7 +89,7 @@ const NODE_TYPES = {
    * @param {HTMLElement} element - DOM element
    * @param {object} attrs - Attributes object
    */
-  function setAttributes(element, attrs) {
+  function setElementAttributes(element, attrs) {
     Object.keys(attrs).forEach(key => {
       if (key === 'key') return; // Skip key attribute (used for diffing)
       
@@ -109,12 +109,12 @@ const NODE_TYPES = {
    * @param {object} vNode - Virtual DOM node to render
    * @param {HTMLElement} container - Container element
    */
-  function render(vNode, container) {
+  function renderToDOM(vNode, container) {
     // Clear the container
     container.innerHTML = '';
     
     // Create and append the DOM element
-    const domElement = createDOMElement(vNode);
+    const domElement = createRealElement(vNode);
     container.appendChild(domElement);
   }
   
@@ -127,7 +127,7 @@ const NODE_TYPES = {
    * @param {object} newVNode - New virtual DOM node
    * @returns {array} Array of patches to apply
    */
-  function diff(oldVNode, newVNode) {
+  function diffVirtualNodes(oldVNode, newVNode) {
     const patches = [];
     
     // If one of the nodes is null/undefined
@@ -156,13 +156,13 @@ const NODE_TYPES = {
     }
     
     // Compare attributes
-    const attrPatches = diffAttributes(oldVNode.attrs, newVNode.attrs);
+    const attrPatches = diffNodeAttributes(oldVNode.attrs, newVNode.attrs);
     if (attrPatches.length > 0) {
       patches.push({ type: 'UPDATE_ATTRS', patches: attrPatches });
     }
     
     // Compare children
-    const childPatches = diffChildren(oldVNode.children, newVNode.children);
+    const childPatches = diffNodeChildren(oldVNode.children, newVNode.children);
     if (childPatches.length > 0) {
       patches.push({ type: 'UPDATE_CHILDREN', patches: childPatches });
     }
@@ -176,7 +176,7 @@ const NODE_TYPES = {
    * @param {object} newAttrs - New attributes
    * @returns {array} Attribute patches
    */
-  function diffAttributes(oldAttrs, newAttrs) {
+  function diffNodeAttributes(oldAttrs, newAttrs) {
     oldAttrs = oldAttrs || {};
     newAttrs = newAttrs || {};
     const patches = [];
@@ -206,7 +206,7 @@ const NODE_TYPES = {
    * @param {array} newChildren - New children
    * @returns {array} Children patches
    */
-  function diffChildren(oldChildren, newChildren) {
+  function diffNodeChildren(oldChildren, newChildren) {
     const patches = [];
     const maxLength = Math.max(oldChildren.length, newChildren.length);
     
@@ -222,7 +222,7 @@ const NODE_TYPES = {
         patches.push({ type: 'REMOVE_CHILD', index: i });
       } else if (oldChild && newChild) {
         // Compare children recursively
-        const childPatches = diff(oldChild, newChild);
+        const childPatches = diffVirtualNodes(oldChild, newChild);
         if (childPatches.length > 0) {
           patches.push({ type: 'UPDATE_CHILD', index: i, patches: childPatches });
         }
@@ -240,11 +240,11 @@ const NODE_TYPES = {
    * @param {HTMLElement} element - DOM element to patch
    * @param {array} patches - Array of patches to apply
    */
-  function patch(element, patches) {
+  function applyPatchesToDOM(element, patches) {
     patches.forEach(patch => {
       switch (patch.type) {
         case 'REPLACE':
-          const newElement = createDOMElement(patch.newNode);
+          const newElement = createRealElement(patch.newNode);
           element.parentNode.replaceChild(newElement, element);
           break;
           
@@ -274,7 +274,7 @@ const NODE_TYPES = {
           patch.patches.forEach(childPatch => {
             switch (childPatch.type) {
               case 'ADD_CHILD':
-                const childElement = createDOMElement(childPatch.child);
+                const childElement = createRealElement(childPatch.child);
                 element.appendChild(childElement);
                 break;
               case 'REMOVE_CHILD':
@@ -283,7 +283,7 @@ const NODE_TYPES = {
                 }
                 break;
               case 'UPDATE_CHILD':
-                patch(element.children[childPatch.index], childPatch.patches);
+                applyPatchesToDOM(element.children[childPatch.index], childPatch.patches);
                 break;
             }
           });
@@ -296,17 +296,17 @@ const NODE_TYPES = {
   // PUBLIC API - Make functions available globally
   window.MiniFramework = {
     // Virtual DOM
-    createVNode,
-    createTextNode,
-    isVNode,
+    createVirtualNode,
+    createVirtualText,
+    isVirtualNode,
     
     // Rendering
-    createDOMElement,
-    render,
+    createRealElement,
+    renderToDOM,
     
     // Diffing and Patching
-    diff,
-    patch,
+    diffVirtualNodes,
+    applyPatchesToDOM,
     
     // Constants
     NODE_TYPES

@@ -161,9 +161,8 @@ function createAutoRenderingComponent(renderFunction, container) {
   // Function to render the component
   function renderComponent() {
     const newVNode = renderFunction(getCurrentState());
-    // Always do a full re-render for testing
     container.innerHTML = '';
-    render(newVNode, container);
+    MiniFramework.renderToDOM(newVNode, container);
     currentVNode = newVNode;
   }
   

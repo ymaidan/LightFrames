@@ -53,19 +53,19 @@
     });
   
     function renderStateApp(state) {
-      return MiniFramework.createVNode('div', {}, [
-        MiniFramework.createVNode('p', {}, [`Counter: ${state.counter}`]),
-        MiniFramework.createVNode('button', {
+      return MiniFramework.createVirtualNode('div', {}, [
+        MiniFramework.createVirtualNode('p', {}, [`Counter: ${state.counter}`]),
+        MiniFramework.createVirtualNode('button', {
           onClick: () => store.updateState(s => ({ ...s, counter: s.counter + 1 }))
         }, ['+']),
-        MiniFramework.createVNode('button', {
+        MiniFramework.createVirtualNode('button', {
           onClick: () => store.updateState(s => ({ ...s, counter: s.counter - 1 }))
         }, ['-']),
-        MiniFramework.createVNode('p', {}, [state.message]),
-        MiniFramework.createVNode('button', {
+        MiniFramework.createVirtualNode('p', {}, [state.message]),
+        MiniFramework.createVirtualNode('button', {
           onClick: () => store.updateState(s => ({ ...s, message: prompt('New message:', s.message) || s.message }))
         }, ['Change Message']),
-        MiniFramework.createVNode('pre', {}, [JSON.stringify(state, null, 2)])
+        MiniFramework.createVirtualNode('pre', {}, [JSON.stringify(state, null, 2)])
       ]);
     }
   
@@ -73,12 +73,12 @@
   
     // --- VIRTUAL DOM DEMO ---
     const vdomDemo = document.getElementById('vdom-demo');
-    const vNode = MiniFramework.createVNode('div', { class: 'container' }, [
-      MiniFramework.createVNode('h2', {}, ['Virtual DOM Demo']),
-      MiniFramework.createVNode('p', {}, ['This is rendered using your mini-framework\'s virtual DOM!']),
-      MiniFramework.createVNode('button', {
+    const vNode = MiniFramework.createVirtualNode('div', { class: 'container' }, [
+      MiniFramework.createVirtualNode('h2', {}, ['Virtual DOM Demo']),
+      MiniFramework.createVirtualNode('p', {}, ['This is rendered using your mini-framework\'s virtual DOM!']),
+      MiniFramework.createVirtualNode('button', {
         onClick: () => alert('Virtual DOM Button Clicked!')
       }, ['Try Me!'])
     ]);
-    MiniFramework.render(vNode, vdomDemo);
+    MiniFramework.renderToDOM(vNode, vdomDemo);
   })();
