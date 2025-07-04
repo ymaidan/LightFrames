@@ -3,7 +3,10 @@ function showHome() {
     MiniFramework.renderToDOM(
       MiniFramework.createVirtualNode('div', {}, [
         MiniFramework.createVirtualNode('h2', {}, ['Home Page']),
-        MiniFramework.createVirtualNode('p', {}, ['Welcome to the Home page!'])
+        MiniFramework.createVirtualNode('p', {}, ['Welcome to the Home page!']),
+        MiniFramework.createVirtualNode('button', {
+          onClick: () => router.goToRoute('/game/42')
+        }, ['Go to Game 42'])
       ]),
       document.getElementById('route-view')
     );
@@ -29,12 +32,41 @@ function showHome() {
     );
   }
   
-  // Set up the router
+  // Dynamic route component
+  function showGame(params) {
+    MiniFramework.renderToDOM(
+      MiniFramework.createVirtualNode('div', {}, [
+        MiniFramework.createVirtualNode('h2', {}, ['Game Page']),
+        MiniFramework.createVirtualNode('p', {}, [`Game ID: ${params.id}`]),
+        MiniFramework.createVirtualNode('button', {
+          onClick: () => router.goToRoute('/')
+        }, ['Back to Home'])
+      ]),
+      document.getElementById('route-view')
+    );
+  }
+  
+  // 404 component
+  function show404() {
+    MiniFramework.renderToDOM(
+      MiniFramework.createVirtualNode('div', {}, [
+        MiniFramework.createVirtualNode('h2', {}, ['404 Not Found']),
+        MiniFramework.createVirtualNode('p', {}, ['Sorry, page not found!']),
+        MiniFramework.createVirtualNode('button', {
+          onClick: () => router.goToRoute('/')
+        }, ['Back to Home'])
+      ]),
+      document.getElementById('route-view')
+    );
+  }
+  
+  // Set up the router with dynamic and 404 routes
   const router = MiniRouter.makeRouter([
     { path: '/', component: showHome },
     { path: '/about', component: showAbout },
-    { path: '/contact', component: showContact }
-  ]);
+    { path: '/contact', component: showContact },
+    { path: '/game/:id', component: showGame }
+  ], show404);
   
   // Navigation buttons
   document.getElementById('nav-home').onclick = () => router.goToRoute('/');
@@ -43,5 +75,5 @@ function showHome() {
   
   // Optional: Listen for route changes
   router.onRouteChange(route => {
-    console.log('Route changed to:', route.path);
+    console.log('Route changed to:', route.path, route.params);
   });

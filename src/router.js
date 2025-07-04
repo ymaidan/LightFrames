@@ -4,10 +4,30 @@
 let routesList = [];//(URL, component, options).
 let currentRoute = null;
 let routeChangeListeners = [];
+let notFoundComponent = null;
+
+// Helper: Match path with dynamic params (e.g. /game/:id)
+function matchRoute(path, routePath) {
+  const paramNames = [];
+  // Convert /game/:id to regex: ^/game/([^/]+)$
+  const regexPath = routePath.replace(/:([^/]+)/g, (_, key) => {
+    paramNames.push(key);
+    return '([^/]+)';
+  });
+  const regex = new RegExp('^' + regexPath + '$');
+  const match = path.match(regex);
+  if (!match) return null;
+  const params = {};
+  paramNames.forEach((name, i) => {
+    params[name] = match[i + 1];
+  });
+  return params;
+}
 
 // 1. Create a new router with your routes
-function makeRouter(initialRoutes = []) {
+function makeRouter(initialRoutes = [], notFound = null) {
   routesList = [];
+  notFoundComponent = notFound;
   initialRoutes.forEach(route => addRouteToRouter(route.path, route.component, route.options));
   // Listen to browser navigation (back/forward)
   window.addEventListener('popstate', handlePopState);
@@ -26,18 +46,41 @@ function addRouteToRouter(path, component, options = {}) {
   routesList.push({ path, component, options });
 }
 
-// 3. Navigate to a different route
+// 3. Navigate to a different route (supports dynamic and 404)
 function goToRoute(path, options = {}) {
-  const route = routesList.find(r => r.path === path);
-  if (!route) {
-    // Not found, you can show a 404 component or do nothing
+  let foundRoute = null;
+  let params = {};
+
+  for (const route of routesList) {
+    const match = matchRoute(path, route.path);
+    if (match) {
+      foundRoute = route;
+      params = match;
+      break;
+    }
+  }
+
+  if (!foundRoute) {
+    // 404 handling
+    currentRoute = { path, component: notFoundComponent, params: {}, options: {} };
+    if (!options.replace) {
+      window.history.pushState({}, '', path);
+    } else {
+      window.history.replaceState({}, '', path);
+    }
+    routeChangeListeners.forEach(fn => fn(currentRoute));
+    if (notFoundComponent && typeof notFoundComponent === 'function') {
+      notFoundComponent();
+    }
     return;
   }
+
   // Route guard: if defined, check if navigation is allowed
-  if (route.options.guard && !route.options.guard()) {
+  if (foundRoute.options.guard && !foundRoute.options.guard(params)) {
     return; // Block navigation
   }
-  currentRoute = route;
+
+  currentRoute = { ...foundRoute, params };
   // Update browser URL
   if (!options.replace) {
     window.history.pushState({}, '', path);
@@ -47,8 +90,8 @@ function goToRoute(path, options = {}) {
   // Notify listeners
   routeChangeListeners.forEach(fn => fn(currentRoute));
   // Render the component (if you want to auto-render)
-  if (route.component && typeof route.component === 'function') {
-    route.component();
+  if (foundRoute.component && typeof foundRoute.component === 'function') {
+    foundRoute.component(params);
   }
 }
 
