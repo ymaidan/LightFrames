@@ -32,7 +32,7 @@ function makeRouter(initialRoutes = [], notFound = null) {
   // Listen to browser navigation (back/forward)
   window.addEventListener('popstate', handlePopState);
   // Go to the current URL on load
-  goToRoute(window.location.pathname, { replace: true });
+  goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
   return {
     addRouteToRouter,
     goToRoute,
@@ -64,9 +64,9 @@ function goToRoute(path, options = {}) {
     // 404 handling
     currentRoute = { path, component: notFoundComponent, params: {}, options: {} };
     if (!options.replace) {
-      window.history.pushState({}, '', path);
+      window.location.hash = path;
     } else {
-      window.history.replaceState({}, '', path);
+      window.location.replace('#' + path);
     }
     routeChangeListeners.forEach(fn => fn(currentRoute));
     if (notFoundComponent && typeof notFoundComponent === 'function') {
@@ -83,9 +83,9 @@ function goToRoute(path, options = {}) {
   currentRoute = { ...foundRoute, params };
   // Update browser URL
   if (!options.replace) {
-    window.history.pushState({}, '', path);
+    window.location.hash = path;
   } else {
-    window.history.replaceState({}, '', path);
+    window.location.replace('#' + path);
   }
   // Notify listeners
   routeChangeListeners.forEach(fn => fn(currentRoute));
@@ -112,8 +112,14 @@ function onRouteChange(callback) {
 
 // Handle browser back/forward
 function handlePopState() {
-  goToRoute(window.location.pathname, { replace: true });
+  goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
 }
+
+// On load and popstate, use hash:
+window.addEventListener('hashchange', handlePopState);
+
+// On initial load:
+goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
 
 // Export for global use
 window.MiniRouter = {
