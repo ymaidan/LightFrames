@@ -11,6 +11,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
+    "build": "echo 'Build complete'",
     "dev": "nodemon server.js --watch src --watch examples --watch docs",
     "examples": "node examples.js",
     "serve": "npm start",
