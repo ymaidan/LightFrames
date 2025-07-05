@@ -2,12 +2,12 @@ import { DOM, Store, Router } from '../../src/index.js';
 
 console.log('🚀 TodoMVC Starting with Glassmorphism Design...');
 
-// TodoMVC State Store
+// TodoMVC State Store with localStorage persistence
 const store = new Store({
     todos: [],
   filter: 'all',
   nextId: 1
-});
+}, 'todoMVC-glassmorphism'); // Enable persistence with key
 
 // TodoMVC Router
 const router = new Router({
@@ -84,6 +84,16 @@ const actions = {
       console.log('🔄 Switching to "all" view after clearing completed');
       actions.setFilter('all');
     }
+  },
+  
+    // NEW: Clear all data (including localStorage)
+    clearAllData() {
+    store.setState({
+      todos: [],
+      filter: 'all',
+      nextId: 1
+    });
+    console.log('🧹 Cleared all data');
   },
   
     setFilter(filter) {

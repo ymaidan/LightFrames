@@ -5,10 +5,25 @@ export const DOM = {
 };
 
 export class Store {
-  constructor(initialState = {}) {
-    this.state = initialState;
+  constructor(initialState = {}, persistenceKey = null) {
+    this.persistenceKey = persistenceKey;
     this.subscribers = [];
-    MiniState.updateState(initialState);
+    
+    // Load from localStorage if persistence key is provided
+    if (persistenceKey) {
+      const savedState = this.loadFromStorage();
+      this.state = savedState ? { ...initialState, ...savedState } : initialState;
+    } else {
+      this.state = initialState;
+    }
+    
+    MiniState.updateState(this.state);
+    
+    // Log persistence status
+    if (persistenceKey) {
+      console.log('💾 Store initialized with persistence key:', persistenceKey);
+      console.log('📦 Loaded state from localStorage:', this.state);
+    }
   }
 
   getState() {
@@ -17,6 +32,12 @@ export class Store {
 
   setState(newState) {
     MiniState.updateState(newState);
+    
+    // Save to localStorage if persistence is enabled
+    if (this.persistenceKey) {
+      this.saveToStorage();
+    }
+    
     this.notifySubscribers();
   }
 
@@ -36,6 +57,53 @@ export class Store {
         console.error('Error in store subscriber:', error);
       }
     });
+  }
+
+  // localStorage methods
+  saveToStorage() {
+    if (!this.persistenceKey) return;
+    
+    try {
+      const state = this.getState();
+      const serializedState = JSON.stringify(state);
+      localStorage.setItem(this.persistenceKey, serializedState);
+      console.log('💾 Saved to localStorage:', this.persistenceKey, state);
+    } catch (error) {
+      console.error('❌ Failed to save to localStorage:', error);
+    }
+  }
+
+  loadFromStorage() {
+    if (!this.persistenceKey) return null;
+    
+    try {
+      const serializedState = localStorage.getItem(this.persistenceKey);
+      if (serializedState === null) {
+        console.log('📦 No saved state found in localStorage');
+        return null;
+      }
+      
+      const state = JSON.parse(serializedState);
+      console.log('📦 Loaded from localStorage:', this.persistenceKey, state);
+      return state;
+    } catch (error) {
+      console.error('❌ Failed to load from localStorage:', error);
+      // Clear corrupted data
+      localStorage.removeItem(this.persistenceKey);
+      return null;
+    }
+  }
+
+  // Method to clear localStorage
+  clearStorage() {
+    if (!this.persistenceKey) return;
+    
+    try {
+      localStorage.removeItem(this.persistenceKey);
+      console.log('🧹 Cleared localStorage:', this.persistenceKey);
+    } catch (error) {
+      console.error('❌ Failed to clear localStorage:', error);
+    }
   }
 }
 
