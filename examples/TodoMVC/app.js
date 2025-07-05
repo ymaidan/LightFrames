@@ -1,13 +1,25 @@
-import { DOM, Store, Router } from '../../src/index.js';
+import { DOM, Store, Router, Events } from '../../src/index.js';
 
-console.log('🚀 TodoMVC Starting with Glassmorphism Design...');
+console.log('🚀 TodoMVC Starting with Mini Framework...');
+
+// Clear any old localStorage data with different keys
+['todoMVC-glassmorphism', 'todoMVC-data'].forEach(key => {
+  if (localStorage.getItem(key)) {
+    console.log('🧹 Clearing old localStorage key:', key);
+    localStorage.removeItem(key);
+  }
+});
 
 // TodoMVC State Store with localStorage persistence
 const store = new Store({
-    todos: [],
+  todos: [],
   filter: 'all',
   nextId: 1
-}, 'todoMVC-glassmorphism'); // Enable persistence with key
+}, 'todoMVC-mini-framework');
+
+// Log what was loaded
+console.log('📦 Initial state:', store.getState());
+console.log('📊 Loaded todos count:', store.getState().todos.length);
 
 // TodoMVC Router
 const router = new Router({
@@ -16,14 +28,21 @@ const router = new Router({
   '/completed': 'completed'
 });
 
-// Sync router with store
+// Sync router with store (only update if different)
 router.subscribe((filter) => {
-  console.log('🔄 Router changed to:', filter);
-  store.setState({ filter });
+  const currentState = store.getState();
+  if (currentState.filter !== filter) {
+    console.log('🔄 Router changed to:', filter);
+    store.setState({ filter });
+  }
 });
 
-// Initialize filter from URL
-store.setState({ filter: router.getCurrentRoute() });
+// Initialize filter from URL (only if different)
+const initialFilter = router.getCurrentRoute();
+if (store.getState().filter !== initialFilter) {
+  console.log('🔄 Setting initial filter to:', initialFilter);
+  store.setState({ filter: initialFilter });
+}
 
 // TodoMVC Actions
 const actions = {
@@ -278,7 +297,10 @@ const render = () => {
     return;
   }
   
-  console.log('🎯 Rendering app...');
+  const state = store.getState();
+  console.log('🎯 Rendering app with state:', state);
+  console.log('📊 Todos count:', state.todos.length);
+  
   DOM.render(TodoApp(), app);
 };
 
@@ -290,8 +312,8 @@ store.subscribe(() => {
 
 // Initial render
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🎯 DOM loaded, rendering Glassmorphism TodoMVC...');
+  console.log('🎯 DOM loaded, rendering TodoMVC with Mini Framework...');
   render();
 });
 
-console.log('✅ Glassmorphism TodoMVC loaded successfully!');
+console.log('✅ TodoMVC loaded successfully with Mini Framework!');

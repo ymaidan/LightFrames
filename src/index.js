@@ -1,9 +1,18 @@
-// Export clean API for TodoMVC
+// Mini Framework - Complete API Export
+// This is the main entry point for your framework
+
+// Wait for all framework components to be loaded
+if (typeof MiniFramework === 'undefined') {
+  throw new Error('MiniFramework core not loaded. Make sure to load core.js first.');
+}
+
+// Core Framework API
 export const DOM = {
   createElement: MiniFramework.createVirtualNode,
   render: MiniFramework.renderToDOM
 };
 
+// State Management
 export class Store {
   constructor(initialState = {}, persistenceKey = null) {
     this.persistenceKey = persistenceKey;
@@ -88,13 +97,11 @@ export class Store {
       return state;
     } catch (error) {
       console.error('❌ Failed to load from localStorage:', error);
-      // Clear corrupted data
       localStorage.removeItem(this.persistenceKey);
       return null;
     }
   }
 
-  // Method to clear localStorage
   clearStorage() {
     if (!this.persistenceKey) return;
     
@@ -107,12 +114,14 @@ export class Store {
   }
 }
 
+// Routing System
 export class Router {
   constructor(routes = {}) {
     this.routes = routes;
     this.subscribers = [];
     this.currentRoute = this.getCurrentRoute();
     
+    // Use custom event system
     MiniEvents.addEvent(window, 'hashchange', () => {
       this.handleRouteChange();
     });
@@ -155,3 +164,14 @@ export class Router {
     });
   }
 }
+
+// Event System
+export const Events = MiniEvents;
+
+// Main Framework Export
+export default {
+  DOM,
+  Store,
+  Router,
+  Events
+};

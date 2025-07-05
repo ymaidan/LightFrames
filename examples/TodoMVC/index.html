@@ -9,13 +9,13 @@
 <body>
   <div id="app"></div>
   
-  <!-- Load the framework core -->
+  <!-- Load the framework core in correct order -->
   <script src="../../src/core.js"></script>
-  <script src="../../src/component.js"></script>
   <script src="../../src/state.js"></script>
   <script src="../../src/events.js"></script>
+  <script src="../../src/component.js"></script>
+  <script src="../../src/router.js"></script>
   <script src="../../src/framework.js"></script>
-  <!-- Don't load router.js separately -->
   
   <!-- Load the TodoMVC app -->
   <script type="module" src="app.js"></script>

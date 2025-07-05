@@ -38,16 +38,16 @@ function mount(app, container) {
   }
 }
 
-// 5. Export the public API
+// 5. Export the public API - with safe checks
 window.Mini = {
   h,
   createComponent,
   createApp,
   mount,
-  // Optionally expose other APIs for advanced users:
-  ...MiniFramework,
-  ...MiniComponent,
-  ...MiniState,
-  ...MiniEvents,
-  ...MiniRouter
+  // Safely expose other APIs:
+  ...(window.MiniFramework || {}),
+  ...(window.MiniComponent || {}),
+  ...(window.MiniState || {}),
+  ...(window.MiniEvents || {}),
+  ...(window.MiniRouter || {})
 };
