@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LightFrame Documentation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="back-nav">
+    <button class="back-button" onclick="window.location.href='/'">← Back to Examples</button>
+  </div>
+  
+  <div id="app">
+    <div class="docs-container">
+      <header class="docs-header">
+        <h1>💡 LightFrame Documentation</h1>
+        <p>Complete framework documentation with API reference and examples</p>
+      </header>
+      
+      <div class="docs-grid">
+        <div class="doc-card" id="overview-card">
+          <div class="doc-icon">📚</div>
+          <h2>Framework Overview</h2>
+          <p>Learn about LightFrame's core concepts, philosophy, and getting started guide.</p>
+          <button onclick="loadDoc('overview')">Read Overview</button>
+        </div>
+        
+        <div class="doc-card" id="api-card">
+          <div class="doc-icon">⚙️</div>
+          <h2>API Reference</h2>
+          <p>Complete reference for all LightFrame APIs with examples and parameters.</p>
+          <button onclick="loadDoc('api')">View API</button>
+        </div>
+        
+        <div class="doc-card" id="examples-card">
+          <div class="doc-icon">💡</div>
+          <h2>Code Examples</h2>
+          <p>Comprehensive examples showing how to use every feature of LightFrame.</p>
+          <button onclick="loadDoc('examples')">See Examples</button>
+        </div>
+        
+        <div class="doc-card" id="quick-start-card">
+          <div class="doc-icon">🚀</div>
+          <h2>Quick Start</h2>
+          <p>Get up and running with LightFrame in minutes with this quick guide.</p>
+          <button onclick="showQuickStart()">Get Started</button>
+        </div>
+      </div>
+      
+      <div class="doc-viewer" id="doc-viewer" style="display: none;">
+        <div class="doc-viewer-header">
+          <h2 id="doc-title">Loading...</h2>
+          <button class="close-btn" onclick="closeDoc()">×</button>
+        </div>
+        <div class="doc-content" id="doc-content">
+          <div class="loading">📖 Loading documentation...</div>
+        </div>
+      </div>
+      
+      <div class="quick-start" id="quick-start" style="display: none;">
+        <div class="quick-start-header">
+          <h2>🚀 Quick Start Guide</h2>
+          <button class="close-btn" onclick="closeQuickStart()">×</button>
+        </div>
+        <div class="quick-start-content">
+          <div class="step">
+            <h3>1. Create HTML Structure</h3>
+            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;My LightFrame App&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="app"&gt;&lt;/div&gt;
+  
+  &lt;script src="./src/core.js"&gt;&lt;/script&gt;
+  &lt;script src="./src/events.js"&gt;&lt;/script&gt;
+  &lt;script src="./src/state.js"&gt;&lt;/script&gt;
+  &lt;script src="./src/framework.js"&gt;&lt;/script&gt;
+  &lt;script src="./app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+          </div>
+          
+          <div class="step">
+            <h3>2. Create Your First Component</h3>
+            <pre><code>// app.js
+const { DOM, Store } = LightFrame;
+
+// Create a store for state management
+const store = new Store({ count: 0 });
+
+// Create a render function
+function render() {
+  const state = store.getState();
+  
+  const app = DOM.createElement('div', { class: 'app' }, [
+    DOM.createElement('h1', {}, ['My LightFrame App']),
+    DOM.createElement('p', {}, [`Count: ${state.count}`]),
+    DOM.createElement('button', {
+      onclick: () => store.setState({ count: state.count + 1 })
+    }, ['Increment'])
+  ]);
+  
+  DOM.render(app, document.getElementById('app'));
+}
+
+// Subscribe to state changes
+store.subscribe(render);
+
+// Initial render
+render();</code></pre>
+          </div>
+          
+          <div class="step">
+            <h3>3. Run Your App</h3>
+            <pre><code>npm start</code></pre>
+            <p>Open <code>http://localhost:3000</code> in your browser!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html> 

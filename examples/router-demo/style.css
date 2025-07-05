@@ -191,3 +191,52 @@ nav {
   transform: translateY(0);
   box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.25);
 }
+
+/* Button Styles */
+button {
+  background: rgba(255, 224, 102, 0.3);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', Arial, sans-serif;
+  margin: 5px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+button:hover {
+  background: rgba(255, 224, 102, 0.4);
+  border-color: rgba(255, 224, 102, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(31, 38, 135, 0.15);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Back to Home button specific style */
+button[onclick*="Home"] {
+  background: rgba(102, 51, 153, 0.3);
+  border-color: rgba(147, 51, 234, 0.4);
+}
+
+button[onclick*="Home"]:hover {
+  background: rgba(102, 51, 153, 0.4);
+  border-color: rgba(147, 51, 234, 0.5);
+}
+
+/* Game button specific style */
+button[onclick*="game"] {
+  background: rgba(51, 153, 102, 0.3);
+  border-color: rgba(51, 234, 147, 0.4);
+}
+
+button[onclick*="game"]:hover {
+  background: rgba(51, 153, 102, 0.4);
+  border-color: rgba(51, 234, 147, 0.5);
+}
