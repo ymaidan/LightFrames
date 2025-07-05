@@ -43,22 +43,22 @@ function goToRoute(path, options = {}) {
     console.warn(`[Router] 404 - Route not found: ${path}`);
     
     if (notFoundComponent && typeof notFoundComponent === 'function') {
-      currentRoute = { 
-        path, 
-        component: notFoundComponent, 
+    currentRoute = { 
+      path, 
+      component: notFoundComponent, 
         params: { requestedPath: path }, 
         options: {},
         is404: true
-      };
-      
-      if (window.location.hash.replace(/^#/, '') !== path) {
-        if (!options.replace) {
-          window.location.hash = path;
-        } else {
-          window.location.replace('#' + path);
-        }
+    };
+
+    if (window.location.hash.replace(/^#/, '') !== path) {
+      if (!options.replace) {
+        window.location.hash = path;
+      } else {
+        window.location.replace('#' + path);
       }
-      
+    }
+
       routeChangeListeners.forEach(fn => fn(currentRoute));
       notFoundComponent({ requestedPath: path });
     }
@@ -118,10 +118,10 @@ class Router {
       // Add new listeners
       window.addEventListener('popstate', handlePopState);
       window.addEventListener('hashchange', handlePopState);
-      
+
       // Initialize with current URL
       setTimeout(() => {
-        goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
+goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
       }, 0);
     }
   }
