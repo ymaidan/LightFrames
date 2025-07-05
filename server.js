@@ -179,8 +179,154 @@ app.get('/examples/:name', (req, res) => {
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath);
   } else {
-    res.status(404).send('<h1>Example not found</h1><a href="/">← Back</a>');
+    // Send 404 page using your framework
+    res.status(404).send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>404 - LightFrame</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #d4d0c8; 
+      font-family: 'Inter', Arial, sans-serif; 
+      min-height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px; 
+    }
+    .container { 
+      background: rgba(120,120,120,0.45); 
+      backdrop-filter: blur(16px); 
+      border-radius: 24px; 
+      border: 1.5px solid rgba(255,255,255,0.25); 
+      padding: 40px; 
+      max-width: 600px; 
+      width: 100%; 
+      box-shadow: 0 8px 32px rgba(31,38,135,0.25); 
+      text-align: center;
+    }
+    h1 { 
+      font-size: 4rem; 
+      color: #ff6b6b; 
+      margin-bottom: 20px; 
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3); 
+    }
+    h2 { 
+      color: #fff; 
+      margin-bottom: 20px; 
+      font-weight: 300; 
+    }
+    p { 
+      color: rgba(255,255,255,0.8); 
+      margin-bottom: 30px; 
+      font-size: 1.1rem; 
+    }
+    .back-button { 
+      background: rgba(255,224,102,0.3); 
+      color: #fff; 
+      border: 1px solid rgba(255,255,255,0.3); 
+      border-radius: 12px; 
+      padding: 12px 24px; 
+      font-size: 1rem; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      text-decoration: none; 
+      display: inline-block; 
+    }
+    .back-button:hover { 
+      background: rgba(255,224,102,0.4); 
+      transform: translateY(-2px); 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>404</h1>
+    <h2>Example Not Found</h2>
+    <p>The example "${req.params.name}" doesn't exist.</p>
+    <a href="/" class="back-button">← Back to Examples</a>
+  </div>
+</body>
+</html>`);
   }
+});
+
+// Handle all other 404s
+app.use((req, res) => {
+  res.status(404).send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>404 - LightFrame</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #d4d0c8; 
+      font-family: 'Inter', Arial, sans-serif; 
+      min-height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px; 
+    }
+    .container { 
+      background: rgba(120,120,120,0.45); 
+      backdrop-filter: blur(16px); 
+      border-radius: 24px; 
+      border: 1.5px solid rgba(255,255,255,0.25); 
+      padding: 40px; 
+      max-width: 600px; 
+      width: 100%; 
+      box-shadow: 0 8px 32px rgba(31,38,135,0.25); 
+      text-align: center;
+    }
+    h1 { 
+      font-size: 4rem; 
+      color: #ff6b6b; 
+      margin-bottom: 20px; 
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3); 
+    }
+    h2 { 
+      color: #fff; 
+      margin-bottom: 20px; 
+      font-weight: 300; 
+    }
+    p { 
+      color: rgba(255,255,255,0.8); 
+      margin-bottom: 30px; 
+      font-size: 1.1rem; 
+    }
+    .back-button { 
+      background: rgba(255,224,102,0.3); 
+      color: #fff; 
+      border: 1px solid rgba(255,255,255,0.3); 
+      border-radius: 12px; 
+      padding: 12px 24px; 
+      font-size: 1rem; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      text-decoration: none; 
+      display: inline-block; 
+    }
+    .back-button:hover { 
+      background: rgba(255,224,102,0.4); 
+      transform: translateY(-2px); 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>404</h1>
+    <h2>Page Not Found</h2>
+    <p>The page you're looking for doesn't exist.</p>
+    <a href="/" class="back-button">← Back to Home</a>
+  </div>
+</body>
+</html>`);
 });
 
 app.listen(port, () => {

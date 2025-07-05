@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TodoMVC - MiniFramework</title>
+  <title>TodoMVC - LightFrame</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,15 +12,17 @@
   </div>
   <div id="app"></div>
   
-  <!-- Load the framework core in correct order -->
+  <!-- Load the framework components in correct order -->
   <script src="../../src/core.js"></script>
   <script src="../../src/state.js"></script>
   <script src="../../src/events.js"></script>
   <script src="../../src/component.js"></script>
-  <script src="../../src/router.js"></script>
   <script src="../../src/framework.js"></script>
+  <script src="../../src/router.js"></script>
+  <script src="../../src/404.js"></script>
+  <script src="../../src/index.js"></script>
   
-  <!-- Load the TodoMVC app -->
+  <!-- Load the TodoMVC app as module -->
   <script type="module" src="app.js"></script>
 </body>
 </html>

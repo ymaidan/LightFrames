@@ -1,6 +1,6 @@
 body {
   background: #d4d0c8;
-  margin: 0;
+    margin: 0;
   font-family: 'Inter', Arial, sans-serif;
   min-height: 100vh;
   padding: 20px;
@@ -181,4 +181,4 @@ p {
 .back-button:active {
   transform: translateY(0);
   box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.25);
-}
+  }

@@ -1,31 +1,33 @@
 // Basic Counter Example using LightFrame
+import { DOM, Store } from '../../src/index.js';
+
 console.log('🚀 Basic Example Starting with LightFrame...');
 
-// Create state store using the global MiniState object
-const store = MiniState.createStateStore({
+// Create state store using modern API
+const store = new Store({
   count: 0
-});
+}, 'basic-counter');
 
 // Counter Component
 const Counter = () => {
-  const state = store.getCurrentState();
+  const state = store.getState();
   
-  return MiniFramework.createVirtualNode('div', { class: 'counter-container' }, [
-    MiniFramework.createVirtualNode('button', {
+  return DOM.createElement('div', { class: 'counter-container' }, [
+    DOM.createElement('button', {
       class: 'counter-btn decrement-btn',
       onclick: () => {
         console.log('🔽 Decrement clicked');
-        store.updateState({ count: state.count - 1 });
+        store.setState({ count: state.count - 1 });
       }
     }, ['−']),
-    MiniFramework.createVirtualNode('span', {
+    DOM.createElement('span', {
       class: 'counter-value'
     }, [String(state.count)]),
-    MiniFramework.createVirtualNode('button', {
+    DOM.createElement('button', {
       class: 'counter-btn increment-btn',
       onclick: () => {
         console.log('🔼 Increment clicked');
-        store.updateState({ count: state.count + 1 });
+        store.setState({ count: state.count + 1 });
       }
     }, ['+'])
   ]);
@@ -33,14 +35,14 @@ const Counter = () => {
 
 // Render function
 const render = () => {
-  console.log('🎯 Rendering counter with count:', store.getCurrentState().count);
+  console.log('🎯 Rendering counter with count:', store.getState().count);
   const app = document.getElementById('app');
-  MiniFramework.renderToDOM(Counter(), app);
+  DOM.render(Counter(), app);
 };
 
-// Subscribe to state changes using the correct method
-store.listenToStateChanges(() => {
-  console.log('🔄 State changed:', store.getCurrentState());
+// Subscribe to state changes
+store.subscribe(() => {
+  console.log('🔄 State changed:', store.getState());
   render();
 });
 

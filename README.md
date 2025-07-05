@@ -188,7 +188,7 @@ DOM.createElement(
 
 Your framework should implement:
 
-- Abstracting the DOM
+- Abstracting the DOM 
 - Routing System
 - State Management
 - Event Handling
@@ -304,4 +304,4 @@ This project will help you learn about:
 - DOM
 - Routing
 - State of an Application
-- Event Handling
+- Event Handling 

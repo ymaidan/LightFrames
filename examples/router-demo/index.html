@@ -2,23 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Framework Router Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LightFrame Router Demo</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="back-nav">
     <button class="back-button" onclick="window.location.href='/'">← Back to Examples</button>
   </div>
-  <nav>
-    <button id="nav-home">Home</button>
-    <button id="nav-about">About</button>
-    <button id="nav-contact">Contact</button>
-  </nav>
-  <div id="route-view"></div>
+  
+  <div class="container">
+    <header class="demo-header">
+      <h1>🧭 Router Demo</h1>
+      <p>Demonstrating client-side routing with LightFrame</p>
+    </header>
+    
+    <nav class="demo-nav">
+      <button id="nav-home" class="nav-btn">🏠 Home</button>
+      <button id="nav-about" class="nav-btn">ℹ️ About</button>
+      <button id="nav-contact" class="nav-btn">📞 Contact</button>
+      <button id="nav-game" class="nav-btn">🎮 Game Demo</button>
+    </nav>
+    
+    <main id="route-view" class="route-content">
+      <!-- Routes will be rendered here -->
+    </main>
+  </div>
+
+  <!-- Load framework in correct order -->
   <script src="../../src/core.js"></script>
-  <script src="../../src/events.js"></script>
   <script src="../../src/state.js"></script>
+  <script src="../../src/events.js"></script>
+  <script src="../../src/component.js"></script>
+  <script src="../../src/framework.js"></script>
   <script src="../../src/router.js"></script>
-  <script src="app.js"></script>
+  <script src="../../src/404.js"></script>
+  <script src="../../src/index.js"></script>
+  
+  <!-- Load app -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>

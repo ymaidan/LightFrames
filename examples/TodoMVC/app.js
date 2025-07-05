@@ -1,6 +1,6 @@
-import { DOM, Store, Router, Events } from '../../src/index.js';
+import { DOM, Store, Router, Events, NotFoundComponent } from '../../src/index.js';
 
-console.log('🚀 TodoMVC Starting with Mini Framework...');
+console.log('🚀 TodoMVC Starting with LightFrame...');
 
 // Clear any old localStorage data with different keys
 ['todoMVC-glassmorphism', 'todoMVC-data'].forEach(key => {
@@ -21,16 +21,61 @@ const store = new Store({
 console.log('📦 Initial state:', store.getState());
 console.log('📊 Loaded todos count:', store.getState().todos.length);
 
-// TodoMVC Router
+// Create 404 component for TodoMVC
+const TodoMVC404 = ({ requestedPath }) => {
+  console.log(`🔍 TodoMVC 404 for: ${requestedPath}`);
+  
+  return DOM.createElement('div', { class: 'todoapp' }, [
+    DOM.createElement('header', { class: 'header' }, [
+      DOM.createElement('h1', {}, ['todos'])
+    ]),
+    DOM.createElement('div', { class: 'not-found-container' }, [
+      DOM.createElement('div', { class: 'not-found-content' }, [
+        DOM.createElement('h2', { class: 'error-code' }, ['404']),
+        DOM.createElement('h3', { class: 'error-title' }, ['Filter Not Found']),
+        DOM.createElement('p', { class: 'error-message' }, [
+          `The filter "${requestedPath}" doesn't exist.`
+        ]),
+        DOM.createElement('div', { class: 'error-actions' }, [
+          DOM.createElement('button', {
+            class: 'filter-button',
+            onclick: () => actions.setFilter('all')
+          }, ['← Back to All']),
+          DOM.createElement('button', {
+            class: 'filter-button', 
+            onclick: () => window.location.href = '/'
+          }, ['🏠 Home'])
+        ])
+      ])
+    ])
+  ]);
+};
+
+// TodoMVC Router with 404 handling
 const router = new Router({
   '/': 'all',
   '/active': 'active',
   '/completed': 'completed'
-});
+}, TodoMVC404); // ✅ Add 404 component
 
 // Sync router with store (only update if different)
-router.subscribe((filter) => {
+router.subscribe((routeInfo) => {
   const currentState = store.getState();
+  
+  // Handle 404 case
+  if (routeInfo && routeInfo.is404) {
+    console.log('🔍 404 route detected, rendering 404 component');
+    const app = document.getElementById('app');
+    if (app) {
+      DOM.render(TodoMVC404({ requestedPath: routeInfo.path }), app);
+    }
+    return;
+  }
+  
+  // Handle normal routes
+  const filter = typeof routeInfo === 'string' ? routeInfo : 
+                 (routeInfo && routeInfo.component) || 'all';
+                 
   if (currentState.filter !== filter) {
     console.log('🔄 Router changed to:', filter);
     store.setState({ filter });
@@ -38,7 +83,10 @@ router.subscribe((filter) => {
 });
 
 // Initialize filter from URL (only if different)
-const initialFilter = router.getCurrentRoute();
+const initialRoute = router.getCurrentRoute();
+const initialFilter = typeof initialRoute === 'string' ? initialRoute : 
+                     (initialRoute && initialRoute.component) || 'all';
+                     
 if (store.getState().filter !== initialFilter) {
   console.log('🔄 Setting initial filter to:', initialFilter);
   store.setState({ filter: initialFilter });
@@ -46,14 +94,14 @@ if (store.getState().filter !== initialFilter) {
 
 // TodoMVC Actions
 const actions = {
-    addTodo(text) {
-      if (!text.trim()) return;
-      
+  addTodo(text) {
+    if (!text.trim()) return;
+    
     const state = store.getState();
     const newTodo = {
       id: state.nextId,
-              text: text.trim(),
-              completed: false
+      text: text.trim(),
+      completed: false
     };
     
     store.setState({
@@ -62,19 +110,19 @@ const actions = {
     });
     
     console.log('✅ Added todo:', newTodo);
-    },
-  
-    toggleTodo(id) {
+  },
+
+  toggleTodo(id) {
     const state = store.getState();
     const todos = state.todos.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      );
-      
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
+    
     store.setState({ todos });
     console.log('🔄 Toggled todo:', id, 'New state:', todos.find(t => t.id === id));
-    },
-  
-    deleteTodo(id) {
+  },
+
+  deleteTodo(id) {
     const state = store.getState();
     const todos = state.todos.filter(todo => todo.id !== id);
     
@@ -104,9 +152,9 @@ const actions = {
       actions.setFilter('all');
     }
   },
-  
-    // NEW: Clear all data (including localStorage)
-    clearAllData() {
+
+  // Clear all data (including localStorage)
+  clearAllData() {
     store.setState({
       todos: [],
       filter: 'all',
@@ -114,8 +162,8 @@ const actions = {
     });
     console.log('🧹 Cleared all data');
   },
-  
-    setFilter(filter) {
+
+  setFilter(filter) {
     const path = filter === 'all' ? '/' : `/${filter}`;
     console.log('🔍 Setting filter to:', filter, 'path:', path);
     router.navigate(path);
@@ -199,7 +247,6 @@ const TodoFooter = () => {
   const completedCount = state.todos.length - activeCount;
 
   // Always show footer if there are ANY todos in the entire list
-  // (not just the filtered view)
   if (state.todos.length === 0) return null;
 
   return DOM.createElement('footer', { class: 'footer' }, [
@@ -244,76 +291,67 @@ const TodoFooter = () => {
       ])
     ]),
     
-    completedCount > 0 ? DOM.createElement('button', {
-      class: 'clear-completed',
-      onclick: () => {
-        console.log('🧹 Clear completed clicked');
-        actions.clearCompleted();
-      }
-    }, ['Clear completed']) : null
-  ].filter(Boolean));
+    ...(completedCount > 0 ? [
+      DOM.createElement('button', {
+        class: 'clear-completed',
+        onclick: () => {
+          console.log('🧹 Clear completed clicked');
+          actions.clearCompleted();
+        }
+      }, ['Clear completed'])
+    ] : [])
+  ]);
 };
 
 const TodoMain = () => {
   const state = store.getState();
-  const allCompleted = state.todos.length > 0 && state.todos.every(todo => todo.completed);
-
-  // Show the main section even when filtering shows no results
+  
   return DOM.createElement('section', { class: 'main' }, [
-    state.todos.length > 0 ? DOM.createElement('input', {
-      id: 'toggle-all',
-      class: 'toggle-all',
-      type: 'checkbox',
-      checked: allCompleted,
-      onclick: () => {
-        console.log('🔄 Toggle all clicked, current all completed:', allCompleted);
-        actions.toggleAll();
-      }
-    }) : null,
-    state.todos.length > 0 ? DOM.createElement('label', { for: 'toggle-all' }, ['Mark all as complete']) : null,
+    ...(state.todos.length > 0 ? [
+      DOM.createElement('input', {
+        id: 'toggle-all',
+        class: 'toggle-all',
+        type: 'checkbox',
+        checked: state.todos.length > 0 && state.todos.every(todo => todo.completed),
+        onclick: () => {
+          console.log('🔄 Toggle all clicked');
+          actions.toggleAll();
+        }
+      }),
+      DOM.createElement('label', { for: 'toggle-all' }, ['Mark all as complete'])
+    ] : []),
     TodoList()
-  ].filter(Boolean));
+  ]);
 };
 
 const TodoApp = () => {
   const state = store.getState();
+  
   console.log('🎨 Rendering TodoApp with state:', state);
   
-  return DOM.createElement('div', { 
-    class: 'todoapp',
-    'data-empty': state.todos.length === 0 ? 'true' : 'false'
-  }, [
+  return DOM.createElement('div', { class: 'todoapp' }, [
     TodoHeader(),
     TodoMain(),
     TodoFooter()
   ].filter(Boolean));
 };
 
-// Initialize App
+// Render function
 const render = () => {
+  console.log('🎯 Rendering app...');
   const app = document.getElementById('app');
-  if (!app) {
-    console.error('❌ App container not found!');
-    return;
+  if (app) {
+    DOM.render(TodoApp(), app);
   }
-  
-  const state = store.getState();
-  console.log('🎯 Rendering app with state:', state);
-  console.log('📊 Todos count:', state.todos.length);
-  
-  DOM.render(TodoApp(), app);
 };
 
-// Subscribe to state changes
-store.subscribe(() => {
-  console.log('🔄 State changed:', store.getState());
+// Subscribe to state changes for re-rendering
+store.subscribe((state) => {
+  console.log('🔄 State changed:', state);
   render();
 });
 
 // Initial render
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🎯 DOM loaded, rendering TodoMVC with Mini Framework...');
-  render();
-});
+render();
 
-console.log('✅ TodoMVC loaded successfully with Mini Framework!');
+console.log('✅ TodoMVC initialized successfully!');

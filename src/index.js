@@ -21,32 +21,26 @@ export class Store {
     // Load from localStorage if persistence key is provided
     if (persistenceKey) {
       const savedState = this.loadFromStorage();
-      this.state = savedState ? { ...initialState, ...savedState } : initialState;
+      this.state = savedState || initialState;
+      if (savedState) {
+        console.log(`📦 Loaded state from localStorage: ${JSON.stringify(savedState)}`);
+      } else {
+        console.log('📦 No saved state found in localStorage');
+      }
     } else {
       this.state = initialState;
     }
     
-    MiniState.updateState(this.state);
-    
-    // Log persistence status
-    if (persistenceKey) {
-      console.log('💾 Store initialized with persistence key:', persistenceKey);
-      console.log('📦 Loaded state from localStorage:', this.state);
-    }
+    console.log(`💾 Store initialized with persistence key: ${persistenceKey}`);
   }
 
   getState() {
-    return MiniState.getCurrentState();
+    return { ...this.state };
   }
 
   setState(newState) {
-    MiniState.updateState(newState);
-    
-    // Save to localStorage if persistence is enabled
-    if (this.persistenceKey) {
-      this.saveToStorage();
-    }
-    
+    this.state = { ...this.state, ...newState };
+    this.saveToStorage();
     this.notifySubscribers();
   }
 
@@ -59,13 +53,7 @@ export class Store {
   }
 
   notifySubscribers() {
-    this.subscribers.forEach(callback => {
-      try {
-        callback(this.getState());
-      } catch (error) {
-        console.error('Error in store subscriber:', error);
-      }
-    });
+    this.subscribers.forEach(callback => callback(this.getState()));
   }
 
   // localStorage methods
@@ -73,12 +61,10 @@ export class Store {
     if (!this.persistenceKey) return;
     
     try {
-      const state = this.getState();
-      const serializedState = JSON.stringify(state);
-      localStorage.setItem(this.persistenceKey, serializedState);
-      console.log('💾 Saved to localStorage:', this.persistenceKey, state);
+      localStorage.setItem(this.persistenceKey, JSON.stringify(this.state));
+      console.log(`💾 Saved to localStorage: ${this.persistenceKey}`, this.state);
     } catch (error) {
-      console.error('❌ Failed to save to localStorage:', error);
+      console.warn('Failed to save to localStorage:', error);
     }
   }
 
@@ -86,18 +72,10 @@ export class Store {
     if (!this.persistenceKey) return null;
     
     try {
-      const serializedState = localStorage.getItem(this.persistenceKey);
-      if (serializedState === null) {
-        console.log('📦 No saved state found in localStorage');
-        return null;
-      }
-      
-      const state = JSON.parse(serializedState);
-      console.log('📦 Loaded from localStorage:', this.persistenceKey, state);
-      return state;
+      const data = localStorage.getItem(this.persistenceKey);
+      return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error('❌ Failed to load from localStorage:', error);
-      localStorage.removeItem(this.persistenceKey);
+      console.warn('Failed to load from localStorage:', error);
       return null;
     }
   }
@@ -114,64 +92,41 @@ export class Store {
   }
 }
 
-// Routing System
-export class Router {
-  constructor(routes = {}) {
-    this.routes = routes;
-    this.subscribers = [];
-    this.currentRoute = this.getCurrentRoute();
-    
-    // Use custom event system
-    MiniEvents.addEvent(window, 'hashchange', () => {
-      this.handleRouteChange();
-    });
-    
-    setTimeout(() => this.handleRouteChange(), 0);
-  }
-
-  getCurrentRoute() {
-    const hash = window.location.hash.slice(1) || '/';
-    return this.routes[hash] || this.routes['/'] || 'all';
-  }
-
-  navigate(path) {
-    window.location.hash = path;
-  }
-
-  handleRouteChange() {
-    const newRoute = this.getCurrentRoute();
-    if (newRoute !== this.currentRoute) {
-      this.currentRoute = newRoute;
-      this.notifySubscribers();
-    }
-  }
-
-  subscribe(callback) {
-    this.subscribers.push(callback);
-    return () => {
-      const index = this.subscribers.indexOf(callback);
-      if (index > -1) this.subscribers.splice(index, 1);
-    };
-  }
-
-  notifySubscribers() {
-    this.subscribers.forEach(callback => {
-      try {
-        callback(this.currentRoute);
-      } catch (error) {
-        console.error('Error in router subscriber:', error);
-      }
-    });
-  }
-}
+// ✅ Import Router properly
+import { Router } from './router.js';
 
 // Event System
-export const Events = MiniEvents;
+export const Events = {
+  addEvent: MiniEvents.addEvent,
+  removeEvent: MiniEvents.removeEvent,
+  triggerEvent: MiniEvents.triggerEvent
+};
+
+// 404 Component (use global version)
+export const NotFoundComponent = window.NotFoundComponent || (() => {
+  console.warn('NotFoundComponent not loaded properly');
+  return DOM.createElement('div', {}, ['404 Component not loaded']);
+});
+
+// ✅ Export Router properly
+export { Router };
 
 // Main Framework Export
 export default {
   DOM,
   Store,
   Router,
-  Events
+  Events,
+  NotFoundComponent
 };
+
+// Legacy support - make everything available globally
+if (typeof window !== 'undefined') {
+  window.LightFrame = {
+    DOM,
+    Store,
+    Router,
+    Events,
+    NotFoundComponent
+  };
+}

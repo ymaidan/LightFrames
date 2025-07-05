@@ -407,3 +407,79 @@ body {
   transform: translateY(0);
   box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.25);
 }
+
+/* 404 Error Styles for TodoMVC */
+.not-found-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.not-found-content {
+  text-align: center;
+  background: rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 40px;
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  max-width: 500px;
+}
+
+.error-code {
+  font-size: 3rem;
+  color: #ff6b6b;
+  margin-bottom: 20px;
+  font-weight: 300;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: 300;
+}
+
+.error-message {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 1rem;
+}
+
+.error-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.filter-button {
+  background: rgba(175, 47, 47, 0.8);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.filter-button:hover {
+  background: rgba(175, 47, 47, 1);
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .error-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .filter-button {
+    width: 200px;
+  }
+}

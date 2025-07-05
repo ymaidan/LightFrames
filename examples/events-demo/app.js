@@ -1,84 +1,127 @@
-(() => {
-    // --- EVENTS DEMO ---
-    const {
-      addEvent,
-      removeEvent,
-      addDelegatedEvent,
-      addMultipleEvents
-    } = window.MiniEvents;
+// Events Demo using modern LightFrame API
+import { DOM, Store } from '../../src/index.js';
+
+console.log('🚀 Events Demo Starting with LightFrame...');
+
+// Create store for demo state
+const store = new Store({
+  counter: 0,
+  message: "Hello, LightFrame!",
+  log: []
+}, 'events-demo');
+
+// Log function
+const addLog = (msg) => {
+  const state = store.getState();
+  store.setState({
+    log: [...state.log, `${new Date().toLocaleTimeString()}: ${msg}`]
+  });
+};
+
+// Event Demo Component
+const EventDemo = () => {
+  return DOM.createElement('div', {}, [
+    DOM.createElement('h2', {}, ['Event System Demo']),
+    DOM.createElement('button', {
+      onclick: () => addLog('Button clicked!')
+    }, ['Click Me']),
+    DOM.createElement('button', {
+      onclick: () => addLog('Button 2 clicked!'),
+      onmouseover: () => addLog('Button 2 hovered!'),
+      style: 'margin-left: 10px;'
+    }, ['Hover or Click Me']),
+    DOM.createElement('ul', {}, [
+      DOM.createElement('li', {
+        onclick: () => addLog('Item 1 clicked')
+      }, ['Item 1 (clickable)']),
+      DOM.createElement('li', {
+        onclick: () => addLog('Item 2 clicked')
+      }, ['Item 2 (clickable)']),
+      DOM.createElement('li', {
+        onclick: () => addLog('Item 3 clicked')
+      }, ['Item 3 (clickable)'])
+    ])
+  ]);
+};
+
+// State Demo Component
+const StateDemo = () => {
+  const state = store.getState();
   
-    const eventDemo = document.getElementById('event-demo');
-    eventDemo.innerHTML = `
-      <h2>Event System Demo</h2>
-      <button id="ev-btn1">Click Me</button>
-      <button id="ev-btn2">Hover or Click Me</button>
-      <ul id="ev-list">
-        <li>Item 1</li>
-        <li>Item 2</li>
-        <li>Item 3</li>
-      </ul>
-      <div id="log"></div>
-    `;
+  return DOM.createElement('div', {}, [
+    DOM.createElement('h2', {}, ['State Management Demo']),
+    DOM.createElement('p', {}, [`Counter: ${state.counter}`]),
+    DOM.createElement('button', {
+      onclick: () => store.setState({ counter: state.counter + 1 })
+    }, ['+']),
+    DOM.createElement('button', {
+      onclick: () => store.setState({ counter: state.counter - 1 }),
+      style: 'margin-left: 10px;'
+    }, ['-']),
+    DOM.createElement('p', {}, [state.message]),
+    DOM.createElement('button', {
+      onclick: () => {
+        const newMessage = prompt('New message:', state.message);
+        if (newMessage) {
+          store.setState({ message: newMessage });
+        }
+      }
+    }, ['Change Message']),
+    DOM.createElement('pre', {}, [JSON.stringify({ counter: state.counter, message: state.message }, null, 2)])
+  ]);
+};
+
+// Virtual DOM Demo Component
+const VirtualDOMDemo = () => {
+  return DOM.createElement('div', {}, [
+    DOM.createElement('h2', {}, ['Virtual DOM Demo']),
+    DOM.createElement('p', {}, ['This is rendered using your mini-framework\'s virtual DOM!']),
+    DOM.createElement('button', {
+      onclick: () => {
+        alert('Virtual DOM Button Clicked!');
+        addLog('Virtual DOM button clicked!');
+      }
+    }, ['Try Me!'])
+  ]);
+};
+
+// Log Display Component
+const LogDisplay = () => {
+  const state = store.getState();
   
-    const log = (msg) => {
-      document.getElementById('log').innerHTML += `<div>${msg}</div>`;
-    };
-  
-    const btn1 = document.getElementById('ev-btn1');
-    addEvent(btn1, 'click', () => log('Button 1 clicked!'));
-  
-    const btn2 = document.getElementById('ev-btn2');
-    addMultipleEvents(btn2, {
-      click: () => log('Button 2 clicked!'),
-      mouseover: () => log('Button 2 hovered!')
-    });
-  
-    const list = document.getElementById('ev-list');
-    addDelegatedEvent(list, 'li', 'click', function() {
-      log('List item clicked: ' + this.textContent);
-    });
-  
-    // --- STATE DEMO ---
-    const {
-      createStateStore,
-      createAutoRenderingComponent
-    } = window.MiniState;
-  
-    const stateDemo = document.getElementById('state-demo');
-    stateDemo.innerHTML = `<h2>State Management Demo</h2><div id="state-app"></div>`;
-  
-    const store = createStateStore({
-      counter: 0,
-      message: "Hello, MiniState!"
-    });
-  
-    function renderStateApp(state) {
-      return MiniFramework.createVirtualNode('div', {}, [
-        MiniFramework.createVirtualNode('p', {}, [`Counter: ${state.counter}`]),
-        MiniFramework.createVirtualNode('button', {
-          onClick: () => store.updateState(s => ({ ...s, counter: s.counter + 1 }))
-        }, ['+']),
-        MiniFramework.createVirtualNode('button', {
-          onClick: () => store.updateState(s => ({ ...s, counter: s.counter - 1 }))
-        }, ['-']),
-        MiniFramework.createVirtualNode('p', {}, [state.message]),
-        MiniFramework.createVirtualNode('button', {
-          onClick: () => store.updateState(s => ({ ...s, message: prompt('New message:', s.message) || s.message }))
-        }, ['Change Message']),
-        MiniFramework.createVirtualNode('pre', {}, [JSON.stringify(state, null, 2)])
-      ]);
-    }
-  
-    createAutoRenderingComponent(renderStateApp, document.getElementById('state-app'));
-  
-    // --- VIRTUAL DOM DEMO ---
-    const vdomDemo = document.getElementById('vdom-demo');
-    const vNode = MiniFramework.createVirtualNode('div', { class: 'container' }, [
-      MiniFramework.createVirtualNode('h2', {}, ['Virtual DOM Demo']),
-      MiniFramework.createVirtualNode('p', {}, ['This is rendered using your mini-framework\'s virtual DOM!']),
-      MiniFramework.createVirtualNode('button', {
-        onClick: () => alert('Virtual DOM Button Clicked!')
-      }, ['Try Me!'])
-    ]);
-    MiniFramework.renderToDOM(vNode, vdomDemo);
-  })();
+  return DOM.createElement('div', {}, [
+    DOM.createElement('h2', {}, ['Event Log']),
+    DOM.createElement('button', {
+      onclick: () => store.setState({ log: [] })
+    }, ['Clear Log']),
+    DOM.createElement('div', { 
+      style: 'max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin: 10px 0;' 
+    }, state.log.map(entry => 
+      DOM.createElement('div', {}, [entry])
+    ))
+  ]);
+};
+
+// Main App Component
+const App = () => {
+  return DOM.createElement('div', {}, [
+    DOM.createElement('div', { id: 'event-demo' }, [EventDemo()]),
+    DOM.createElement('div', { id: 'state-demo' }, [StateDemo()]),
+    DOM.createElement('div', { id: 'vdom-demo' }, [VirtualDOMDemo()]),
+    DOM.createElement('div', { id: 'log-display' }, [LogDisplay()])
+  ]);
+};
+
+// Render function
+const render = () => {
+  const app = document.getElementById('app');
+  DOM.render(App(), app);
+};
+
+// Subscribe to state changes
+store.subscribe(render);
+
+// Initial render
+render();
+
+console.log('✅ Events Demo loaded successfully!');
