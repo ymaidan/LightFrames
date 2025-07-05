@@ -1,14 +1,194 @@
-# mini-framework
+# 🚀 Mini Framework
 
-Now that you have already used a framework of your choice, you must now implement some features on a framework of your own. That's right, you are going to create a framework.
+A custom JavaScript framework with DOM abstraction, state management, routing, and event handling.
 
-Be aware that a framework is different from a library. When you call a method from a library, you are in control. But with a framework, the control is inverted: the framework calls you.
+## 📋 Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Running Examples](#running-examples)
+- [Framework Usage](#framework-usage)
+- [Project Structure](#project-structure)
+- [Development](#development)
+
+## ✨ Features
+
+- **🎯 DOM Abstraction**: Virtual DOM with efficient rendering
+- **📊 State Management**: Reactive state with localStorage persistence
+- **🧭 Routing System**: Hash-based client-side routing
+- **⚡ Event Handling**: Custom event system (no addEventListener)
+- **🔄 Component System**: Reusable component architecture
+
+## 🚀 Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <your-repo-url>
+   cd mini-framework
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+## 🎯 Quick Start
+
+### Method 1: Interactive Web Interface (Recommended)
+
+```bash
+npm start
+```
+
+- Opens `http://localhost:3000` with a beautiful example selector
+- Click on any example to test it
+- Visual interface showing all available examples
+
+### Method 2: Interactive CLI Menu
+
+```bash
+npm run examples
+```
+
+- Shows numbered menu of examples
+- Type a number to select and launch an example
+- Automatically opens browser
+
+### Method 3: Direct Example Launch
+
+```bash
+# Launch specific examples directly
+npm run todomvc     # TodoMVC implementation
+npm run basic       # Basic DOM manipulation
+npm run components  # Component system demo
+npm run events      # Event handling showcase
+npm run router      # Routing demonstration
+```
+
+### Method 4: Command Line Arguments
+
+```bash
+# Launch examples with direct commands
+node examples.js TodoMVC
+node examples.js basic
+node examples.js component-demo
+node examples.js events-demo
+node examples.js router-demo
+```
+
+## 📁 Running Examples
+
+### Available Examples
+
+| Example            | Description                       | Command              |
+| ------------------ | --------------------------------- | -------------------- |
+| **TodoMVC**        | Complete TodoMVC with persistence | `npm run todomvc`    |
+| **Basic**          | Simple DOM manipulation           | `npm run basic`      |
+| **Component Demo** | Reusable components               | `npm run components` |
+| **Events Demo**    | Custom event system               | `npm run events`     |
+| **Router Demo**    | Client-side routing               | `npm run router`     |
+
+### Example URLs (when server is running)
+
+- 🏠 **Example Selector**: `http://localhost:3000`
+- 📝 **TodoMVC**: `http://localhost:3000/examples/TodoMVC`
+- 🎯 **Basic**: `http://localhost:3000/examples/basic`
+- 🧩 **Components**: `http://localhost:3000/examples/component-demo`
+- ⚡ **Events**: `http://localhost:3000/examples/events-demo`
+- 🧭 **Router**: `http://localhost:3000/examples/router-demo`
+
+### List All Examples
+
+```bash
+npm run list-examples
+```
+
+## 🛠️ Framework Usage
+
+### Basic Setup
+
+```javascript
+import { DOM, Store, Router, Events } from "./src/index.js";
+
+// Create elements with Virtual DOM
+const element = DOM.createElement("div", { class: "container" }, [
+  DOM.createElement("h1", {}, ["Hello World"]),
+  DOM.createElement(
+    "button",
+    {
+      onclick: () => console.log("Clicked!"),
+    },
+    ["Click me"]
+  ),
+]);
+
+// Render to DOM
+DOM.render(element, document.getElementById("app"));
+```
+
+### State Management
+
+```javascript
+// Create store with persistence
+const store = new Store(
+  {
+    count: 0,
+    items: [],
+  },
+  "my-app-data"
+);
+
+// Update state
+store.setState({ count: 1 });
+
+// Subscribe to changes
+store.subscribe((state) => {
+  console.log("State changed:", state);
+});
+```
+
+### Routing
+
+```javascript
+// Setup routes
+const router = new Router({
+  "/": "home",
+  "/about": "about",
+  "/contact": "contact",
+});
+
+// Listen to route changes
+router.subscribe((route) => {
+  console.log("Current route:", route);
+});
+
+// Navigate
+router.navigate("/about");
+```
+
+### Event Handling
+
+```javascript
+// Framework uses custom event system
+DOM.createElement(
+  "button",
+  {
+    onclick: (e) => console.log("Custom click event"),
+    onkeydown: (e) => console.log("Key pressed:", e.key),
+  },
+  ["Interactive Button"]
+);
+```
+
+## 📂 Project Structure
 
 ## Objectives
 
 Your framework should implement:
 
-- Abstracting the DOM 
+- Abstracting the DOM
 - Routing System
 - State Management
 - Event Handling
@@ -124,4 +304,4 @@ This project will help you learn about:
 - DOM
 - Routing
 - State of an Application
-- Event Handling 
+- Event Handling

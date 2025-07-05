@@ -3,12 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>MiniComponent Demo</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="back-nav">
+    <button class="back-button" onclick="window.location.href='/'">← Back to Examples</button>
+  </div>
   <div id="app"></div>
-  <!-- Load your framework files -->
+  
+  <!-- Load framework files in correct order -->
   <script src="../../src/core.js"></script>
+  <script src="../../src/events.js"></script>
   <script src="../../src/component.js"></script>
+  
   <!-- Demo app -->
   <script src="app.js"></script>
 </body>
