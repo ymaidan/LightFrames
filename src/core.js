@@ -16,11 +16,19 @@ const NODE_TYPES = {
    * @returns {object} Virtual DOM node object
    */
   function createVirtualNode(tag, attrs = {}, children = []) {
+    // Normalize children - convert strings to text nodes
+    const normalizedChildren = children.map(child => {
+      if (typeof child === 'string') {
+        return createVirtualText(child);
+      }
+      return child;
+    });
+    
     return {
       type: NODE_TYPES.ELEMENT,
       tag: tag,
       attrs: attrs,
-      children: children,
+      children: normalizedChildren,
       key: attrs.key || null // For efficient list updates
     };
   }
@@ -94,9 +102,13 @@ const NODE_TYPES = {
       if (key === 'key') return; // Skip key attribute (used for diffing)
       
       if (key.startsWith('on')) {
-        // Handle event listeners (e.g., onClick, onInput)
+        // Handle event listeners using our custom MiniEvents system
         const eventName = key.toLowerCase().substring(2); // 'onClick' -> 'click'
-        element.addEventListener(eventName, attrs[key]);
+        // Store the handler for potential cleanup
+        element._miniEventHandlers = element._miniEventHandlers || {};
+        element._miniEventHandlers[eventName] = attrs[key];
+        // Use MiniEvents instead of native addEventListener
+        MiniEvents.addEvent(element, eventName, attrs[key]);
       } else {
         // Handle regular attributes
         element.setAttribute(key, attrs[key]);
@@ -207,12 +219,24 @@ const NODE_TYPES = {
    * @returns {array} Children patches
    */
   function diffNodeChildren(oldChildren, newChildren) {
+    // Ensure children arrays exist
+    oldChildren = oldChildren || [];
+    newChildren = newChildren || [];
+    
     const patches = [];
     const maxLength = Math.max(oldChildren.length, newChildren.length);
     
     for (let i = 0; i < maxLength; i++) {
-      const oldChild = oldChildren[i];
-      const newChild = newChildren[i];
+      let oldChild = oldChildren[i];
+      let newChild = newChildren[i];
+      
+      // Convert string children to virtual text nodes
+      if (typeof oldChild === 'string') {
+        oldChild = createVirtualText(oldChild);
+      }
+      if (typeof newChild === 'string') {
+        newChild = createVirtualText(newChild);
+      }
       
       if (!oldChild && newChild) {
         // New child
@@ -258,7 +282,8 @@ const NODE_TYPES = {
               case 'SET_ATTR':
                 if (attrPatch.key.startsWith('on')) {
                   const eventName = attrPatch.key.toLowerCase().substring(2);
-                  element.addEventListener(eventName, attrPatch.value);
+                  // Use MiniEvents instead of native addEventListener
+                  MiniEvents.addEvent(element, eventName, attrPatch.value);
                 } else {
                   element.setAttribute(attrPatch.key, attrPatch.value);
                 }

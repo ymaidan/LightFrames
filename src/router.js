@@ -30,7 +30,7 @@ function makeRouter(initialRoutes = [], notFound = null) {
   notFoundComponent = notFound;
   initialRoutes.forEach(route => addRouteToRouter(route.path, route.component, route.options));
   // Listen to browser navigation (back/forward)
-  window.addEventListener('popstate', handlePopState);
+  MiniEvents.addEvent(window, 'popstate', handlePopState);
   // Go to the current URL on load
   goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
   return {
@@ -51,6 +51,9 @@ function goToRoute(path, options = {}) {
   let foundRoute = null;
   let params = {};
 
+  // Log navigation attempt
+  console.log(`[Router] Navigating to: ${path}`);
+
   for (const route of routesList) {
     const match = matchRoute(path, route.path);
     if (match) {
@@ -61,16 +64,37 @@ function goToRoute(path, options = {}) {
   }
 
   if (!foundRoute) {
-    // 404 handling
-    currentRoute = { path, component: notFoundComponent, params: {}, options: {} };
-    if (!options.replace) {
-      window.location.hash = path;
-    } else {
-      window.location.replace('#' + path);
+    // Log 404 error
+    console.warn(`[Router] 404 - Route not found: ${path}`);
+    
+    // Set current route to 404
+    currentRoute = { 
+      path, 
+      component: notFoundComponent, 
+      params: { 
+        requestedPath: path 
+      }, 
+      options: {} 
+    };
+
+    // Update URL
+    if (window.location.hash.replace(/^#/, '') !== path) {
+      if (!options.replace) {
+        window.location.hash = path;
+      } else {
+        window.location.replace('#' + path);
+      }
     }
-    routeChangeListeners.forEach(fn => fn(currentRoute));
+
+    // Notify listeners with 404 info
+    routeChangeListeners.forEach(fn => fn({
+      type: '404',
+      path: path,
+      currentRoute: currentRoute
+    }));
+
     if (notFoundComponent && typeof notFoundComponent === 'function') {
-      notFoundComponent();
+      notFoundComponent({ requestedPath: path });
     }
     return;
   }
@@ -81,11 +105,13 @@ function goToRoute(path, options = {}) {
   }
 
   currentRoute = { ...foundRoute, params };
-  // Update browser URL
-  if (!options.replace) {
-    window.location.hash = path;
-  } else {
-    window.location.replace('#' + path);
+  // Only update the hash if it's different
+  if (window.location.hash.replace(/^#/, '') !== path) {
+    if (!options.replace) {
+      window.location.hash = path;
+    } else {
+      window.location.replace('#' + path);
+    }
   }
   // Notify listeners
   routeChangeListeners.forEach(fn => fn(currentRoute));
@@ -116,10 +142,21 @@ function handlePopState() {
 }
 
 // On load and popstate, use hash:
-window.addEventListener('hashchange', handlePopState);
+MiniEvents.addEvent(window, 'popstate', handlePopState);
+MiniEvents.addEvent(window, 'hashchange', handlePopState);
 
 // On initial load:
 goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
+
+// Add a route change listener for logging
+onRouteChange((routeInfo) => {
+  if (routeInfo.type === '404') {
+    console.group('[Router] 404 Error');
+    console.log('Requested Path:', routeInfo.path);
+    console.log('Current Route:', routeInfo.currentRoute);
+    console.groupEnd();
+  }
+});
 
 // Export for global use
 window.MiniRouter = {
