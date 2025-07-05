@@ -33,6 +33,11 @@ function addEvent(element, eventType, handler) {
     'mouseout': 'onmouseout',
     'keydown': 'onkeydown',
     'keyup': 'onkeyup',
+    'keypress': 'onkeypress',
+    'change': 'onchange',
+    'blur': 'onblur',
+    'focus': 'onfocus',
+    'dblclick': 'ondblclick',
     'load': 'onload',
     'hashchange': 'onhashchange',
     'popstate': 'onpopstate'
