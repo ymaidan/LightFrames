@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LightFrame Test Suite</title>
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .test-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-controls {
+            margin-bottom: 20px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #test-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .pass { color: #27ae60; }
+        .fail { color: #e74c3c; }
+        .info { color: #f39c12; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💡 LightFrame Test Suite</h1>
+        <p>Comprehensive testing for your custom JavaScript framework</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test Controls</h2>
+        <div class="test-controls">
+            <button onclick="runFrameworkTests()">Run Framework Tests</button>
+            <button onclick="runTodoMVCTests()">Run TodoMVC Tests</button>
+            <button onclick="runAllTests()">Run All Tests</button>
+            <button onclick="clearOutput()">Clear Output</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Output</h2>
+        <div id="test-output"></div>
+    </div>
+
+    <!-- Load the framework -->
+    <script src="../src/core.js"></script>
+    <script src="../src/events.js"></script>
+    <script src="../src/state.js"></script>
+    <script src="../src/component.js"></script>
+    <script src="../src/router.js"></script>
+    <script src="../src/framework.js"></script>
+    <script src="../src/index.js"></script>
+
+    <!-- Load test suites -->
+    <script src="framework.test.js"></script>
+    <script src="todoMVC.test.js"></script>
+
+    <script>
+        // Capture console output
+        const originalLog = console.log;
+        const originalError = console.error;
+        const output = document.getElementById('test-output');
+
+        function addToOutput(message, type = 'info') {
+            const span = document.createElement('span');
+            span.className = type;
+            span.textContent = message + '\n';
+            output.appendChild(span);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            addToOutput(args.join(' '), 'pass');
+            originalLog.apply(console, args);
+        };
+
+        console.error = function(...args) {
+            addToOutput(args.join(' '), 'fail');
+            originalError.apply(console, args);
+        };
+
+        // Test runner functions
+        async function runFrameworkTests() {
+            addToOutput('🚀 Starting Framework Tests...', 'info');
+            if (window.FrameworkTests) {
+                await window.FrameworkTests.run();
+            } else {
+                addToOutput('❌ Framework tests not loaded', 'fail');
+            }
+        }
+
+        async function runTodoMVCTests() {
+            addToOutput('🚀 Starting TodoMVC Tests...', 'info');
+            if (window.TodoMVCTests) {
+                await window.TodoMVCTests.run();
+            } else {
+                addToOutput('❌ TodoMVC tests not loaded', 'fail');
+            }
+        }
+
+        async function runAllTests() {
+            addToOutput('🚀 Starting All Tests...', 'info');
+            await runFrameworkTests();
+            addToOutput('', 'info');
+            await runTodoMVCTests();
+            addToOutput('✅ All tests completed!', 'info');
+        }
+
+        function clearOutput() {
+            output.innerHTML = '';
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            addToOutput('🧪 LightFrame Test Suite Ready!', 'info');
+            addToOutput('Click a button above to run tests.', 'info');
+        });
+    </script>
+</body>
+</html> 

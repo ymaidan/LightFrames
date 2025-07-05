@@ -68,8 +68,14 @@ app.get('/', (req, res) => {
     .subtitle { 
       text-align: center; 
       color: rgba(255,255,255,0.9); 
-      margin-bottom: 40px; 
+      margin-bottom: 10px; 
       font-size: 1.2rem; 
+    }
+    .instruction { 
+      text-align: center; 
+      color: rgba(255,255,255,0.8); 
+      margin-bottom: 40px; 
+      font-size: 1rem; 
     }
     .docs { 
       background: rgba(102,51,153,0.3); 
@@ -94,6 +100,7 @@ app.get('/', (req, res) => {
       display: grid; 
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
       gap: 20px; 
+      margin-bottom: 30px; 
     }
     .card { 
       background: rgba(80,80,80,0.3); 
@@ -125,6 +132,12 @@ app.get('/', (req, res) => {
       border-radius: 8px; 
       font-size: 0.8rem; 
     }
+    .features-text { 
+      text-align: center; 
+      color: rgba(255,255,255,0.8); 
+      font-size: 0.9rem; 
+      margin-top: 20px; 
+    }
     @media (max-width: 768px) { 
       h1 { font-size: 3rem; } 
       .container { padding: 30px 20px; } 
@@ -136,6 +149,7 @@ app.get('/', (req, res) => {
   <div class="container">
     <h1>💡 LightFrame</h1>
     <p class="subtitle">Lightweight JavaScript framework</p>
+    <p class="instruction">Choose example to explore the framework</p>
     
     <div class="docs">
       <a href="/examples/docs-overview">📚 Documentation & API Reference</a>
@@ -150,6 +164,10 @@ app.get('/', (req, res) => {
         </a>
       `).join('')}
     </div>
+    
+    <p class="features-text">
+      Features: DOM Abstraction • State Management • Routing System • Event Handling
+    </p>
   </div>
 </body>
 </html>`);
