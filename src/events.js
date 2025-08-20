@@ -3,6 +3,16 @@ const eventRegistry = new Map(); // Store all event handlers
 
 // Add an event listener to an element
 function addEvent(element, eventType, handler) {
+  // Handle window events specially
+  if (element === window && ['popstate', 'hashchange'].includes(eventType)) {
+    const currentHandler = element['on' + eventType];
+    element['on' + eventType] = function(event) {
+      if (currentHandler) currentHandler.call(element, event);
+      handler.call(element, event);
+    };
+    return;
+  }
+  
   // Create a unique key for this element
   const elementKey = element._miniEventId || (element._miniEventId = Math.random().toString(36));
   

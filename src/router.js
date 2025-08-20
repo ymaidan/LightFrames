@@ -71,6 +71,15 @@ function goToRoute(path, options = {}) {
 
   currentRoute = { ...foundRoute, params, is404: false };
   
+  // ✅ ADD: Auto-sync URL changes to state
+  if (window.appStore) {
+    window.appStore.setState({
+      currentRoute: path,
+      routeParams: params,
+      is404: false
+    });
+  }
+  
   if (window.location.hash.replace(/^#/, '') !== path) {
     if (!options.replace) {
       window.location.hash = path;
@@ -93,7 +102,7 @@ function handlePopState() {
 
 // README.md Compatible Router Class
 class Router {
-  constructor(routes, notFound = null) {
+  constructor(routes, notFound = null, stateStore = null) {
     routesList = [];
     notFoundComponent = notFound;
     routeChangeListeners = [];
@@ -112,17 +121,31 @@ class Router {
     // Setup browser navigation
     if (typeof window !== 'undefined') {
       // Remove existing listeners to avoid duplicates
-      window.removeEventListener('popstate', handlePopState);
-      window.removeEventListener('hashchange', handlePopState);
+      window.onpopstate = null;
+      window.onhashchange = null;
       
-      // Add new listeners
-      window.addEventListener('popstate', handlePopState);
-      window.addEventListener('hashchange', handlePopState);
+      // Add new listeners using custom event system
+      window.onpopstate = handlePopState;
+      window.onhashchange = handlePopState;
 
       // Initialize with current URL
       setTimeout(() => {
-goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
+        goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
       }, 0);
+    }
+
+    // Store reference for state synchronization
+    this.stateStore = stateStore;
+    
+    // Auto-sync route changes to state if store provided
+    if (this.stateStore) {
+      this.subscribe((routeInfo) => {
+        this.stateStore.setState({
+          currentRoute: routeInfo.path,
+          routeParams: routeInfo.params,
+          route404: routeInfo.is404 || false
+        });
+      });
     }
   }
   
@@ -156,6 +179,26 @@ goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
   // Get current route name/component
   getCurrentRouteInfo() {
     return currentRoute;
+  }
+
+  // Enhanced Router with State Integration
+  connectToStore(store, stateKey = 'routing') {
+    this.connectedStore = store;
+    this.stateKey = stateKey;
+    
+    this.subscribe((routeInfo) => {
+      const routeState = {
+        path: routeInfo.path,
+        params: routeInfo.params || {},
+        is404: routeInfo.is404 || false
+      };
+      
+      this.connectedStore.setState({
+        [this.stateKey]: routeState
+      });
+    });
+    
+    return this;
   }
 }
 

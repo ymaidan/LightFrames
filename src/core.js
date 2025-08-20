@@ -325,7 +325,7 @@ const NODE_TYPES = {
     createVirtualText,
     isVirtualNode,
     
-    // Rendering
+    // Rendering DOM
     createRealElement,
     renderToDOM,
     

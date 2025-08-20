@@ -14,7 +14,8 @@ console.log('🚀 TodoMVC Starting with LightFrame...');
 const store = new Store({
   todos: [],
   filter: 'all',
-  nextId: 1
+  nextId: 1,
+  routing: { path: '/', params: {} }
 }, 'todoMVC-mini-framework');
 
 // Log what was loaded
