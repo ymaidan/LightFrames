@@ -1,209 +1,172 @@
-// Router Demo using modern LightFrame API
-import { DOM, Router } from '../../src/index.js';
+// Router Demo with State Synchronization
+import { DOM } from '../../src/index.js';
 
-console.log('🚀 Router Demo Starting...');
+console.log('🚀 Router Demo with State Starting...');
 
-// Route Components using modern DOM API
-const HomePage = () => {
-  return DOM.createElement('div', { class: 'page-content' }, [
-    DOM.createElement('div', { class: 'page-header' }, [
-      DOM.createElement('h2', {}, ['🏠 Home Page']),
-      DOM.createElement('p', {}, ['Welcome to the LightFrame Router Demo!'])
-    ]),
-    DOM.createElement('div', { class: 'page-body' }, [
-      DOM.createElement('p', {}, ['This demonstrates client-side routing with URL synchronization.']),
-      DOM.createElement('div', { class: 'demo-actions' }, [
-        DOM.createElement('button', {
-          class: 'action-btn primary',
-          onclick: () => router.navigate('/game/42')
-        }, ['🎮 Go to Game 42']),
-        DOM.createElement('button', {
-          class: 'action-btn secondary',
-          onclick: () => router.navigate('/about')
-        }, ['ℹ️ Learn More'])
-      ])
+// Create state store for the app
+const appState = window.MiniState?.createStateStore({
+  currentRoute: '/',
+  routeParams: {},
+  user: { name: 'Guest', visits: 0 },
+  isLoading: false
+}) || null;
+
+// Home Page Component
+const HomePage = (params) => {
+  const state = appState ? appState.getCurrentState() : { user: { visits: 0 } };
+  
+  return DOM.createElement('div', { 
+    style: 'text-align: center; color: white; padding: 40px;' 
+  }, [
+    DOM.createElement('h1', { 
+      style: 'font-size: 2.5rem; margin-bottom: 20px;' 
+    }, ['🏠 Home Page']),
+    DOM.createElement('p', { 
+      style: 'margin-bottom: 20px; opacity: 0.9;' 
+    }, [`Welcome! You've visited ${state.user.visits} times`]),
+    DOM.createElement('div', {
+      style: 'display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;'
+    }, [
+      DOM.createElement('button', {
+        style: 'background: rgba(255,224,102,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; color: white; padding: 10px 20px; cursor: pointer; margin: 5px;',
+        onclick: () => router.navigate('/about')
+      }, ['About']),
+      DOM.createElement('button', {
+        style: 'background: rgba(76,175,80,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; color: white; padding: 10px 20px; cursor: pointer; margin: 5px;',
+        onclick: () => router.navigate('/game/42')
+      }, ['Game #42']),
+      DOM.createElement('button', {
+        style: 'background: rgba(255,152,0,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; color: white; padding: 10px 20px; cursor: pointer; margin: 5px;',
+        onclick: () => {
+          if (appState) {
+            appState.updateState(state => ({
+              ...state,
+              user: { ...state.user, visits: state.user.visits + 1 }
+            }));
+          }
+        }
+      }, ['Increment Visits'])
     ])
   ]);
 };
 
-const AboutPage = () => {
-  return DOM.createElement('div', { class: 'page-content' }, [
-    DOM.createElement('div', { class: 'page-header' }, [
-      DOM.createElement('h2', {}, ['ℹ️ About Page']),
-      DOM.createElement('p', {}, ['Learn about LightFrame routing'])
-    ]),
-    DOM.createElement('div', { class: 'page-body' }, [
-      DOM.createElement('div', { class: 'feature-list' }, [
-        DOM.createElement('h3', {}, ['Router Features:']),
-        DOM.createElement('ul', {}, [
-          DOM.createElement('li', {}, ['✅ Hash-based routing']),
-          DOM.createElement('li', {}, ['✅ Dynamic parameters']),
-          DOM.createElement('li', {}, ['✅ 404 handling']),
-          DOM.createElement('li', {}, ['✅ Browser back/forward support']),
-          DOM.createElement('li', {}, ['✅ URL synchronization'])
-        ])
-      ]),
-      DOM.createElement('div', { class: 'demo-actions' }, [
-        DOM.createElement('button', {
-          class: 'action-btn',
-          onclick: () => router.navigate('/')
-        }, ['🏠 Back to Home'])
-      ])
-    ])
+// About Page Component
+const AboutPage = (params) => {
+  return DOM.createElement('div', { 
+    style: 'text-align: center; color: white; padding: 40px;' 
+  }, [
+    DOM.createElement('h1', { 
+      style: 'font-size: 2.5rem; margin-bottom: 20px;' 
+    }, ['ℹ️ About']),
+    DOM.createElement('p', { 
+      style: 'margin-bottom: 20px; opacity: 0.9; line-height: 1.6;' 
+    }, ['This router demo shows URL and state synchronization. When you navigate, both the URL and app state change together.']),
+    DOM.createElement('button', {
+      style: 'background: rgba(255,224,102,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; color: white; padding: 10px 20px; cursor: pointer;',
+      onclick: () => router.navigate('/')
+    }, ['← Back Home'])
   ]);
 };
 
-const ContactPage = () => {
-  return DOM.createElement('div', { class: 'page-content' }, [
-    DOM.createElement('div', { class: 'page-header' }, [
-      DOM.createElement('h2', {}, ['📞 Contact Page']),
-      DOM.createElement('p', {}, ['Get in touch with us'])
+// Contact Page Component
+const ContactPage = (params) => {
+  return DOM.createElement('div', { 
+    style: 'text-align: center; color: white; padding: 40px;' 
+  }, [
+    DOM.createElement('h1', { 
+      style: 'font-size: 2.5rem; margin-bottom: 20px;' 
+    }, ['📞 Contact']),
+    DOM.createElement('p', { 
+      style: 'margin-bottom: 20px; opacity: 0.9; line-height: 1.6;' 
+    }, ['Get in touch with us! This page demonstrates routing with navigation buttons.']),
+    DOM.createElement('div', {
+      style: 'margin-bottom: 20px; opacity: 0.8;'
+    }, [
+      DOM.createElement('p', { style: 'margin: 5px 0;' }, ['📧 Email: hello@miniframework.dev']),
+      DOM.createElement('p', { style: 'margin: 5px 0;' }, ['🌐 Website: miniframework.dev']),
+      DOM.createElement('p', { style: 'margin: 5px 0;' }, ['📱 Twitter: @miniframework'])
     ]),
-    DOM.createElement('div', { class: 'page-body' }, [
-      DOM.createElement('div', { class: 'contact-info' }, [
-        DOM.createElement('p', {}, ['📧 Email: hello@lightframe.dev']),
-        DOM.createElement('p', {}, ['🌐 Website: lightframe.dev']),
-        DOM.createElement('p', {}, ['📱 Twitter: @lightframe'])
-      ]),
-      DOM.createElement('div', { class: 'demo-actions' }, [
-        DOM.createElement('button', {
-          class: 'action-btn',
-          onclick: () => router.navigate('/')
-        }, ['🏠 Back to Home']),
-        DOM.createElement('button', {
-          class: 'action-btn secondary',
-          onclick: () => router.navigate('/about')
-        }, ['ℹ️ About'])
-      ])
-    ])
+    DOM.createElement('button', {
+      style: 'background: rgba(255,224,102,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; color: white; padding: 10px 20px; cursor: pointer;',
+      onclick: () => router.navigate('/')
+    }, ['← Back Home'])
   ]);
 };
 
-// Dynamic route component with parameters
+// Game Page with Dynamic Parameters
 const GamePage = (params) => {
   const gameId = params.id || 'unknown';
   
-  return DOM.createElement('div', { class: 'page-content' }, [
-    DOM.createElement('div', { class: 'page-header' }, [
-      DOM.createElement('h2', {}, ['🎮 Game Page']),
-      DOM.createElement('p', {}, [`Playing Game #${gameId}`])
-    ]),
-    DOM.createElement('div', { class: 'page-body' }, [
-      DOM.createElement('div', { class: 'game-info' }, [
-        DOM.createElement('h3', {}, ['Game Information:']),
-        DOM.createElement('p', {}, [`Game ID: ${gameId}`]),
-        DOM.createElement('p', {}, ['Status: ✅ Active']),
-        DOM.createElement('p', {}, ['Players: 🎯 Single Player'])
-      ]),
-      DOM.createElement('div', { class: 'demo-actions' }, [
-        DOM.createElement('button', {
-          class: 'action-btn primary',
-          onclick: () => router.navigate('/game/' + (parseInt(gameId) + 1))
-        }, [`🎮 Next Game (#${parseInt(gameId) + 1})`]),
-        DOM.createElement('button', {
-          class: 'action-btn',
-          onclick: () => router.navigate('/')
-        }, ['🏠 Back to Home'])
-      ])
+  return DOM.createElement('div', { 
+    style: 'text-align: center; color: white; padding: 40px;' 
+  }, [
+    DOM.createElement('h1', { 
+      style: 'font-size: 2.5rem; margin-bottom: 20px;' 
+    }, [`🎮 Game #${gameId}`]),
+    DOM.createElement('p', { 
+      style: 'margin-bottom: 20px; opacity: 0.9;' 
+    }, [`You're playing game ${gameId}! The URL parameter is automatically extracted.`]),
+    DOM.createElement('div', {
+      style: 'display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;'
+    }, [
+      DOM.createElement('button', {
+        style: 'background: rgba(76,175,80,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; color: white; padding: 10px 20px; cursor: pointer; margin: 5px;',
+        onclick: () => router.navigate(`/game/${parseInt(gameId) + 1}`)
+      }, [`Next Game (#${parseInt(gameId) + 1})`]),
+      DOM.createElement('button', {
+        style: 'background: rgba(255,224,102,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; color: white; padding: 10px 20px; cursor: pointer; margin: 5px;',
+        onclick: () => router.navigate('/')
+      }, ['← Home'])
     ])
   ]);
 };
 
-// Custom 404 component for router demo
-const Router404 = ({ requestedPath }) => {
-  return DOM.createElement('div', { class: 'page-content error-page' }, [
-    DOM.createElement('div', { class: 'page-header' }, [
-      DOM.createElement('h2', { class: 'error-code' }, ['404']),
-      DOM.createElement('p', {}, ['Route Not Found'])
-    ]),
-    DOM.createElement('div', { class: 'page-body' }, [
-      DOM.createElement('p', { class: 'error-message' }, [
-        `The route "${requestedPath}" doesn't exist in this demo.`
-      ]),
-      DOM.createElement('div', { class: 'available-routes' }, [
-        DOM.createElement('h3', {}, ['Available Routes:']),
-        DOM.createElement('ul', {}, [
-          DOM.createElement('li', {}, [
-            DOM.createElement('a', { 
-              href: '#/',
-              onclick: (e) => { e.preventDefault(); router.navigate('/'); }
-            }, ['🏠 Home (/)'])
-          ]),
-          DOM.createElement('li', {}, [
-            DOM.createElement('a', { 
-              href: '#/about',
-              onclick: (e) => { e.preventDefault(); router.navigate('/about'); }
-            }, ['ℹ️ About (/about)'])
-          ]),
-          DOM.createElement('li', {}, [
-            DOM.createElement('a', { 
-              href: '#/contact',
-              onclick: (e) => { e.preventDefault(); router.navigate('/contact'); }
-            }, ['📞 Contact (/contact)'])
-          ]),
-          DOM.createElement('li', {}, ['🎮 Game (/game/:id)'])
-        ])
-      ]),
-      DOM.createElement('div', { class: 'demo-actions' }, [
-        DOM.createElement('button', {
-          class: 'action-btn primary',
-          onclick: () => router.navigate('/')
-        }, ['🏠 Go Home'])
-      ])
-    ])
-  ]);
-};
-
-// Setup Router with modern API
-const router = new Router({
+// Create router with state store including the missing /contact route
+const router = new window.Router({
   '/': HomePage,
   '/about': AboutPage,
   '/contact': ContactPage,
   '/game/:id': GamePage
-}, Router404);
+}, window.NotFoundComponent, appState);
 
-// Render function
-const render = (component) => {
-  const routeView = document.getElementById('route-view');
-  if (routeView && component) {
-    DOM.render(component, routeView);
+// Setup navigation buttons using custom event system
+const setupNavigation = () => {
+  const navHome = document.getElementById('nav-home');
+  const navAbout = document.getElementById('nav-about');
+  const navContact = document.getElementById('nav-contact');
+  const navGame = document.getElementById('nav-game');
+
+  if (navHome && window.MiniEvents) {
+    MiniEvents.addEvent(navHome, 'click', () => router.navigate('/'));
   }
+  if (navAbout && window.MiniEvents) {
+    MiniEvents.addEvent(navAbout, 'click', () => router.navigate('/about'));
+  }
+  if (navContact && window.MiniEvents) {
+    MiniEvents.addEvent(navContact, 'click', () => router.navigate('/contact'));
+  }
+  if (navGame && window.MiniEvents) {
+    MiniEvents.addEvent(navGame, 'click', () => router.navigate('/game/1'));
+  }
+
+  console.log('✅ Navigation buttons setup complete');
 };
 
-// Subscribe to route changes and render
+// Wait for DOM to be ready, then setup navigation
+setTimeout(setupNavigation, 100);
+
+// Listen to state changes and re-render when state updates
+if (appState) {
+  appState.listenToStateChanges((newState) => {
+    console.log('🔄 State changed:', newState);
+    // Re-render current route when state changes
+    router.handleRoute();
+  });
+}
+
+// Subscribe to route changes
 router.subscribe((routeInfo) => {
-  console.log('🧭 Route changed:', routeInfo);
-  
-  if (routeInfo && routeInfo.is404) {
-    // Handle 404
-    render(Router404({ requestedPath: routeInfo.path }));
-  } else if (routeInfo && routeInfo.component) {
-    // Handle normal routes
-    if (typeof routeInfo.component === 'function') {
-      const component = routeInfo.component(routeInfo.params || {});
-      render(component);
-    }
-  }
+  console.log('🧭 Route changed:', routeInfo.path, 'Params:', routeInfo.params);
 });
 
-// Setup navigation buttons
-document.addEventListener('DOMContentLoaded', () => {
-  const setupNav = () => {
-    const navHome = document.getElementById('nav-home');
-    const navAbout = document.getElementById('nav-about');
-    const navContact = document.getElementById('nav-contact');
-    const navGame = document.getElementById('nav-game');
-
-    if (navHome) navHome.onclick = () => router.navigate('/');
-    if (navAbout) navAbout.onclick = () => router.navigate('/about');
-    if (navContact) navContact.onclick = () => router.navigate('/contact');
-    if (navGame) navGame.onclick = () => router.navigate('/game/1');
-
-    console.log('✅ Navigation buttons setup complete');
-  };
-
-  // Setup navigation after a short delay to ensure DOM is ready
-  setTimeout(setupNav, 100);
-});
-
-console.log('✅ Router Demo initialized successfully!');
+console.log('✅ Router Demo with State Synchronization loaded!');

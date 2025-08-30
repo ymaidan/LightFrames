@@ -1,229 +1,154 @@
-// src/router.js - LightFrame Router with README.md compatible API
-
-// Internal router implementation
-let routesList = [];
+// Router with State Synchronization for LightFrame
+let routes = {};
 let currentRoute = null;
-let routeChangeListeners = [];
-let notFoundComponent = null;
+let listeners = [];
+let appState = null;
+let stateStore = null;
 
-// Helper: Match path with dynamic params
-function matchRoute(path, routePath) {
-  const paramNames = [];
-  const regexPath = routePath.replace(/:([^/]+)/g, (_, key) => {
-    paramNames.push(key);
-    return '([^/]+)';
-  });
-  const regex = new RegExp('^' + regexPath + '$');
-  const match = path.match(regex);
-  if (!match) return null;
-  const params = {};
-  paramNames.forEach((name, i) => {
-    params[name] = match[i + 1];
-  });
-  return params;
-}
-
-// Navigate to a route
-function goToRoute(path, options = {}) {
-  let foundRoute = null;
-  let params = {};
-
-  console.log(`[Router] Navigating to: ${path}`);
-
-  for (const route of routesList) {
-    const match = matchRoute(path, route.path);
-    if (match) {
-      foundRoute = route;
-      params = match;
-      break;
+// Basic router class that synchronizes URL with app state
+class Router {
+  constructor(routeMap = {}, notFoundComponent = null, store = null) {
+    routes = routeMap;
+    this.notFoundComponent = notFoundComponent;
+    stateStore = store;
+    
+    // Initialize state with routing info
+    if (stateStore) {
+      stateStore.updateState({
+        currentRoute: '/',
+        routeParams: {},
+        isLoading: false
+      });
+    }
+    
+    this.init();
+  }
+  
+  init() {
+    // Use custom event system instead of addEventListener
+    if (window.MiniEvents) {
+      MiniEvents.addEvent(window, 'hashchange', () => this.handleRoute());
+      MiniEvents.addEvent(window, 'load', () => this.handleRoute());
+    } else {
+      // Fallback to direct assignment
+      window.onhashchange = () => this.handleRoute();
+      window.onload = () => this.handleRoute();
     }
   }
-
-  if (!foundRoute) {
-    console.warn(`[Router] 404 - Route not found: ${path}`);
+  
+  handleRoute() {
+    const hash = window.location.hash.slice(1) || '/';
+    const { route, params } = this.matchRoute(hash);
     
-    if (notFoundComponent && typeof notFoundComponent === 'function') {
-    currentRoute = { 
-      path, 
-      component: notFoundComponent, 
-        params: { requestedPath: path }, 
-        options: {},
-        is404: true
-    };
-
-    if (window.location.hash.replace(/^#/, '') !== path) {
-      if (!options.replace) {
-        window.location.hash = path;
-      } else {
-        window.location.replace('#' + path);
+    // Update state with new route info
+    if (stateStore) {
+      stateStore.updateState({
+        currentRoute: hash,
+        routeParams: params,
+        isLoading: false,
+        route404: !route
+      });
+    }
+    
+    if (route && typeof route === 'function') {
+      currentRoute = { path: hash, component: route, params, is404: false };
+      this.notifyListeners(currentRoute);
+      
+      // Render the component
+      const app = document.getElementById('app') || document.getElementById('route-view');
+      if (app && window.MiniFramework) {
+        const component = route(params);
+        window.MiniFramework.renderToDOM(component, app);
+      }
+    } else {
+      // Handle 404
+      currentRoute = { path: hash, component: this.notFoundComponent, params: { requestedPath: hash }, is404: true };
+      this.notifyListeners(currentRoute);
+      
+      if (this.notFoundComponent) {
+        const app = document.getElementById('app') || document.getElementById('route-view');
+        if (app && window.MiniFramework) {
+          const component = this.notFoundComponent({ requestedPath: hash });
+          window.MiniFramework.renderToDOM(component, app);
+        }
       }
     }
-
-      routeChangeListeners.forEach(fn => fn(currentRoute));
-      notFoundComponent({ requestedPath: path });
+  }
+  
+  // Match route with dynamic parameters (like /game/:id)
+  matchRoute(path) {
+    for (const [routePath, component] of Object.entries(routes)) {
+      const params = this.extractParams(routePath, path);
+      if (params !== null) {
+        return { route: component, params };
+      }
     }
-    return;
-  }
-
-  if (foundRoute.options && foundRoute.options.guard && !foundRoute.options.guard(params)) {
-    return;
-  }
-
-  currentRoute = { ...foundRoute, params, is404: false };
-  
-  // ✅ ADD: Auto-sync URL changes to state
-  if (window.appStore) {
-    window.appStore.setState({
-      currentRoute: path,
-      routeParams: params,
-      is404: false
-    });
+    return { route: null, params: {} };
   }
   
-  if (window.location.hash.replace(/^#/, '') !== path) {
-    if (!options.replace) {
-      window.location.hash = path;
-    } else {
-      window.location.replace('#' + path);
-    }
-  }
-  
-  routeChangeListeners.forEach(fn => fn(currentRoute));
-  
-  if (foundRoute.component && typeof foundRoute.component === 'function') {
-    foundRoute.component(params);
-  }
-}
-
-// Handle browser back/forward
-function handlePopState() {
-  goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
-}
-
-// README.md Compatible Router Class
-class Router {
-  constructor(routes, notFound = null, stateStore = null) {
-    routesList = [];
-    notFoundComponent = notFound;
-    routeChangeListeners = [];
+  // Extract parameters from dynamic routes
+  extractParams(routePath, actualPath) {
+    const routeParts = routePath.split('/').filter(part => part);
+    const pathParts = actualPath.split('/').filter(part => part);
     
-    // Convert routes object to array format
-    if (typeof routes === 'object' && !Array.isArray(routes)) {
-      Object.entries(routes).forEach(([path, component]) => {
-        this.addRoute(path, component);
-      });
-    } else if (Array.isArray(routes)) {
-      routes.forEach(route => {
-        this.addRoute(route.path, route.component, route.options);
-      });
+    if (routeParts.length !== pathParts.length) {
+      return null;
     }
     
-    // Setup browser navigation
-    if (typeof window !== 'undefined') {
-      // Remove existing listeners to avoid duplicates
-      window.onpopstate = null;
-      window.onhashchange = null;
+    const params = {};
+    for (let i = 0; i < routeParts.length; i++) {
+      const routePart = routeParts[i];
+      const pathPart = pathParts[i];
       
-      // Add new listeners using custom event system
-      window.onpopstate = handlePopState;
-      window.onhashchange = handlePopState;
-
-      // Initialize with current URL
-      setTimeout(() => {
-        goToRoute(window.location.hash.replace(/^#/, '') || '/', { replace: true });
-      }, 0);
+      if (routePart.startsWith(':')) {
+        // Dynamic parameter
+        params[routePart.slice(1)] = pathPart;
+      } else if (routePart !== pathPart) {
+        // Static part doesn't match
+        return null;
+      }
     }
-
-    // Store reference for state synchronization
-    this.stateStore = stateStore;
     
-    // Auto-sync route changes to state if store provided
-    if (this.stateStore) {
-      this.subscribe((routeInfo) => {
-        this.stateStore.setState({
-          currentRoute: routeInfo.path,
-          routeParams: routeInfo.params,
-          route404: routeInfo.is404 || false
-        });
+    return params;
+  }
+  
+  navigate(path) {
+    // Update state before navigation
+    if (stateStore) {
+      stateStore.updateState({
+        isLoading: true
       });
     }
+    
+    window.location.hash = path;
   }
   
-  // Add a route
-  addRoute(path, component, options = {}) {
-    routesList.push({ path, component, options });
-    return this;
+  addRoute(path, component) {
+    routes[path] = component;
   }
   
-  // Navigate to a route (README.md compatible)
-  navigate(path, options = {}) {
-    goToRoute(path, options);
-    return this;
-  }
-  
-  // Subscribe to route changes (README.md compatible)
   subscribe(callback) {
-    routeChangeListeners.push(callback);
-    // Return unsubscribe function
+    listeners.push(callback);
     return () => {
-      const idx = routeChangeListeners.indexOf(callback);
-      if (idx > -1) routeChangeListeners.splice(idx, 1);
+      const index = listeners.indexOf(callback);
+      if (index > -1) listeners.splice(index, 1);
     };
+  }
+  
+  notifyListeners(route) {
+    listeners.forEach(fn => fn(route));
   }
   
   // Get current route info
   getCurrentRoute() {
-    return currentRoute ? (currentRoute.component || currentRoute.path) : null;
-  }
-  
-  // Get current route name/component
-  getCurrentRouteInfo() {
     return currentRoute;
   }
-
-  // Enhanced Router with State Integration
-  connectToStore(store, stateKey = 'routing') {
-    this.connectedStore = store;
-    this.stateKey = stateKey;
-    
-    this.subscribe((routeInfo) => {
-      const routeState = {
-        path: routeInfo.path,
-        params: routeInfo.params || {},
-        is404: routeInfo.is404 || false
-      };
-      
-      this.connectedStore.setState({
-        [this.stateKey]: routeState
-      });
-    });
-    
-    return this;
-  }
 }
 
-// Legacy API for backward compatibility
-const MiniRouter = {
-  makeRouter: (routes, notFound) => new Router(routes, notFound),
-  addRouteToRouter: (path, component, options) => {
-    routesList.push({ path, component, options });
-  },
-  goToRoute,
-  getCurrentRouteInfo: () => currentRoute,
-  onRouteChange: (callback) => {
-    routeChangeListeners.push(callback);
-    return () => {
-      const idx = routeChangeListeners.indexOf(callback);
-      if (idx > -1) routeChangeListeners.splice(idx, 1);
-    };
-  }
-};
-
-// Export for global use
+// Export
 if (typeof window !== 'undefined') {
-  window.MiniRouter = MiniRouter;
   window.Router = Router;
+  window.MiniRouter = { Router };
 }
 
-// ✅ Proper ES6 export for modules
-export { Router, MiniRouter };
+export { Router };

@@ -169,10 +169,80 @@ function generateAutoHTML(exampleName) {
   <script src="../../src/router.js"></script>
   <script src="../../src/component.js"></script>
   <script src="../../src/framework.js"></script>
-  <script src="../../src/404.js"></script>
   
   <!-- Load app -->
   <script type="module" src="app.js"></script>
+</body>
+</html>`;
+}
+
+// Simple 404 page
+function generate404Page(exampleName) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <title>404 - LightFrame</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #d4d0c8; 
+      font-family: 'Inter', Arial, sans-serif; 
+      min-height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px; 
+    }
+    .container { 
+      background: rgba(120,120,120,0.45); 
+      backdrop-filter: blur(16px); 
+      border-radius: 24px; 
+      border: 1.5px solid rgba(255,255,255,0.25); 
+      padding: 40px; 
+      max-width: 600px; 
+      width: 100%; 
+      box-shadow: 0 8px 32px rgba(31,38,135,0.25); 
+      text-align: center;
+    }
+    h1 { 
+      font-size: 4rem; 
+      color: #ff6b6b; 
+      margin-bottom: 20px; 
+    }
+    h2 { 
+      color: #fff; 
+      margin-bottom: 20px; 
+    }
+    p { 
+      color: rgba(255,255,255,0.8); 
+      margin-bottom: 30px; 
+    }
+    .back-button { 
+      background: rgba(255,224,102,0.3); 
+      color: #fff; 
+      border: 1px solid rgba(255,255,255,0.3); 
+      border-radius: 12px; 
+      padding: 12px 24px; 
+      font-size: 1rem; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      text-decoration: none; 
+      display: inline-block; 
+    }
+    .back-button:hover { 
+      background: rgba(255,224,102,0.4); 
+      transform: translateY(-2px); 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>404</h1>
+    <h2>Page Not Found</h2>
+    <p>The example "${exampleName}" doesn't exist.</p>
+    <a href="/" class="back-button">← Back to Home</a>
+  </div>
 </body>
 </html>`;
 }
@@ -188,8 +258,13 @@ app.get('/examples/:name', (req, res) => {
   } else if (fs.existsSync(appJsPath)) {
     res.send(generateAutoHTML(req.params.name));
   } else {
-    res.status(404).send('Example not found');
+    res.status(404).send(generate404Page(req.params.name));
   }
+});
+
+// Handle all other 404s
+app.use((req, res) => {
+  res.status(404).send(generate404Page('unknown'));
 });
 
 app.listen(port, () => {
