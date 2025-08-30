@@ -1,0 +1,415 @@
+/* LightFrame Test Example Styles */
+
+body {
+    background: #d4d0c8;
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  #app {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .test-app {
+    background: rgba(120, 120, 120, 0.45);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 24px;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.25);
+    overflow: hidden;
+  }
+  
+  /* Navigation */
+  .test-nav {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .test-nav h2 {
+    color: #fff;
+    margin: 0 0 20px 0;
+    font-size: 1.8rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .nav-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .nav-btn {
+    background: rgba(255, 224, 102, 0.3);
+    color: #ffeb3b;
+    border: 1px solid rgba(255, 224, 102, 0.4);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .nav-btn:hover {
+    background: rgba(255, 224, 102, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  .nav-btn.active {
+    background: rgba(255, 224, 102, 0.6);
+    border-color: rgba(255, 224, 102, 0.8);
+    color: #fff;
+  }
+  
+  /* Content Area */
+  .test-content {
+    padding: 40px;
+  }
+  
+  .test-content h3 {
+    color: #fff;
+    margin: 0 0 15px 0;
+    font-size: 1.5rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .test-content p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+  
+  /* Overview Section */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .feature-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  
+  .feature-card h4 {
+    color: #ffeb3b;
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+  }
+  
+  .feature-card p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+  
+  .feature-card code {
+    background: rgba(0, 0, 0, 0.3);
+    color: #ffeb3b;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+  
+  /* Stats Section */
+  .stats-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+  }
+  
+  .stat {
+    text-align: center;
+  }
+  
+  .stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #ffeb3b;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 5px;
+  }
+  
+  /* Counter Section */
+  .counter-demo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin: 30px 0;
+  }
+  
+  .counter-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 300;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .counter-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffeb3b;
+    transform: scale(1.1);
+  }
+  
+  .counter-display {
+    font-size: 3rem;
+    font-weight: 600;
+    color: #fff;
+    min-width: 100px;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .counter-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+  }
+  
+  .action-btn {
+    background: rgba(255, 224, 102, 0.3);
+    color: #ffeb3b;
+    border: 1px solid rgba(255, 224, 102, 0.4);
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .action-btn:hover {
+    background: rgba(255, 224, 102, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  /* Todos Section */
+  .todo-input {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .todo-input input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #fff;
+    font-size: 1rem;
+  }
+  
+  .todo-input input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .add-btn {
+    background: rgba(255, 224, 102, 0.3);
+    color: #ffeb3b;
+    border: 1px solid rgba(255, 224, 102, 0.4);
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .add-btn:hover {
+    background: rgba(255, 224, 102, 0.4);
+  }
+  
+  .todo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .todo-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .todo-item.completed {
+    opacity: 0.6;
+  }
+  
+  .todo-item.completed .todo-text {
+    text-decoration: line-through;
+  }
+  
+  .todo-text {
+    color: #fff;
+    flex: 1;
+  }
+  
+  /* Events Section */
+  .event-demos {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .event-btn {
+    background: rgba(255, 224, 102, 0.3);
+    color: #ffeb3b;
+    border: 1px solid rgba(255, 224, 102, 0.4);
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .event-btn:hover {
+    background: rgba(255, 224, 102, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  .event-demos input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #fff;
+    font-size: 1rem;
+  }
+  
+  .interactions-log {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  
+  .interactions-log h4 {
+    color: #ffeb3b;
+    margin: 0 0 15px 0;
+  }
+  
+  .interactions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .interaction-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+  
+  .interaction-type {
+    color: #ffeb3b;
+    font-weight: 500;
+  }
+  
+  .interaction-time {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  /* Back Navigation */
+  .back-nav {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+  }
+  
+  .back-button {
+    background: rgba(120, 120, 120, 0.45);
+    backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 16px;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    padding: 12px 20px;
+    color: #fff;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .back-button:hover {
+    background: rgba(140, 140, 140, 0.55);
+    transform: translateY(-2px);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    body {
+      padding: 10px;
+    }
+    
+    .test-content {
+      padding: 20px;
+    }
+    
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .counter-demo {
+      gap: 20px;
+    }
+    
+    .counter-btn {
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+    }
+    
+    .counter-display {
+      font-size: 2rem;
+    }
+    
+    .nav-buttons {
+      flex-direction: column;
+    }
+    
+    .event-demos {
+      flex-direction: column;
+    }
+  }
