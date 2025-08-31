@@ -458,3 +458,37 @@ body {
     width: 200px;
   }
 }
+
+/* Edit mode styles */
+.todo-list li.editing {
+  border-bottom: none;
+  padding: 0;
+}
+
+.todo-list li.editing .view {
+  display: none;
+}
+
+.todo-list li .edit {
+  display: none;
+  width: 100%;
+  padding: 20px 25px;
+  font-size: 1.1rem;
+  font-family: 'Inter', Arial, sans-serif;
+  color: #fff;
+  background: rgba(100, 100, 100, 0.4);
+  border: 2px solid rgba(255, 224, 102, 0.5);
+  border-radius: 12px;
+  outline: none;
+  margin: 15px 20px;
+  box-shadow: 0 0 20px rgba(255, 224, 102, 0.3);
+}
+
+.todo-list li.editing .edit {
+  display: block;
+}
+
+.todo-list li .edit:focus {
+  background: rgba(120, 120, 120, 0.4);
+  border-color: rgba(255, 224, 102, 0.7);
+}

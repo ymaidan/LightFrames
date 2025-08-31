@@ -1,42 +1,26 @@
 import { DOM, Store } from '../../src/index.js';
 
-console.log('🚀 TodoMVC Starting with Simple Routing...');
-
 // TodoMVC State Store
 const store = new Store({
   todos: [],
   filter: 'all',
-  nextId: 1
+  nextId: 1,
+  editingId: null
 }, 'todoMVC-mini-framework');
 
-console.log('📦 Initial state:', store.getState());
-
-// Simple hash-based routing for TodoMVC (no Router class needed)
+// Simple routing
 function handleRoute() {
   const hash = window.location.hash.slice(1) || '/';
-  let filter;
+  const filter = hash === '/' ? 'all' : hash.slice(1);
   
-  if (hash === '/') {
-    filter = 'all';
-  } else if (hash === '/active') {
-    filter = 'active';
-  } else if (hash === '/completed') {
-    filter = 'completed';
-  } else {
-    // Invalid filter - redirect to all
-    window.location.hash = '/';
-    return;
-  }
-  
-  // Update filter if different
-  const currentState = store.getState();
-  if (currentState.filter !== filter) {
-    console.log('🔄 Route changed to filter:', filter);
+  if (['all', 'active', 'completed'].includes(filter)) {
     store.setState({ filter });
+  } else {
+    window.location.hash = '/';
   }
 }
 
-// Setup simple routing
+// Setup routing
 if (window.MiniEvents) {
   MiniEvents.addEvent(window, 'hashchange', handleRoute);
   MiniEvents.addEvent(window, 'load', handleRoute);
@@ -45,63 +29,80 @@ if (window.MiniEvents) {
   window.onload = handleRoute;
 }
 
-// TodoMVC Actions
+// Actions
 const actions = {
   addTodo(text) {
     if (!text.trim()) return;
-    
     const state = store.getState();
-    const newTodo = {
-      id: state.nextId,
-      text: text.trim(),
-      completed: false
-    };
-    
     store.setState({
-      todos: [...state.todos, newTodo],
+      todos: [...state.todos, {
+        id: state.nextId,
+        text: text.trim(),
+        completed: false
+      }],
       nextId: state.nextId + 1
     });
-    
-    console.log('✅ Added todo:', newTodo);
   },
 
   toggleTodo(id) {
     const state = store.getState();
-    const todos = state.todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    );
-    
-    store.setState({ todos });
-    console.log('🔄 Toggled todo:', id);
+    store.setState({
+      todos: state.todos.map(todo =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    });
   },
 
   deleteTodo(id) {
     const state = store.getState();
-    const todos = state.todos.filter(todo => todo.id !== id);
+    store.setState({
+      todos: state.todos.filter(todo => todo.id !== id)
+    });
+  },
+
+  editTodo(id) {
+    store.setState({ editingId: id });
+  },
+
+  saveEdit(id, newText) {
+    const trimmed = newText.trim();
+    if (!trimmed) {
+      this.deleteTodo(id);
+      return;
+    }
     
-    store.setState({ todos });
-    console.log('🗑️ Deleted todo:', id);
+    const state = store.getState();
+    store.setState({
+      todos: state.todos.map(todo =>
+        todo.id === id ? { ...todo, text: trimmed } : todo
+      ),
+      editingId: null
+    });
+  },
+
+  cancelEdit() {
+    store.setState({ editingId: null });
   },
 
   clearCompleted() {
     const state = store.getState();
-    const todos = state.todos.filter(todo => !todo.completed);
-    
-    store.setState({ todos });
-    console.log('🧹 Cleared completed todos');
+    store.setState({
+      todos: state.todos.filter(todo => !todo.completed)
+    });
   },
 
   setFilter(filter) {
-    const path = filter === 'all' ? '/' : `/${filter}`;
-    console.log('🔍 Setting filter to:', filter);
-    window.location.hash = path;
+    window.location.hash = filter === 'all' ? '/' : `/${filter}`;
   }
 };
 
-// TodoMVC Components
+// Components
 const TodoItem = (todo) => {
+  const state = store.getState();
+  const isEditing = state.editingId === todo.id;
+
   return DOM.createElement('li', {
-    class: todo.completed ? 'completed' : ''
+    class: `${todo.completed ? 'completed' : ''} ${isEditing ? 'editing' : ''}`
   }, [
     DOM.createElement('div', { class: 'view' }, [
       DOM.createElement('input', {
@@ -110,16 +111,47 @@ const TodoItem = (todo) => {
         checked: todo.completed,
         onclick: () => actions.toggleTodo(todo.id)
       }),
-      DOM.createElement('label', {}, [todo.text]),
+      DOM.createElement('label', {
+        ondblclick: () => actions.editTodo(todo.id)
+      }, [todo.text]),
       DOM.createElement('button', {
         class: 'destroy',
         onclick: () => actions.deleteTodo(todo.id)
       })
-    ])
+    ]),
+    ...(isEditing ? [
+      DOM.createElement('input', {
+        class: 'edit',
+        type: 'text',
+        value: todo.text,
+        onkeydown: (e) => {
+          if (e.key === 'Enter') {
+            actions.saveEdit(todo.id, e.target.value);
+          } else if (e.key === 'Escape') {
+            actions.cancelEdit();
+          }
+        },
+        onblur: (e) => actions.saveEdit(todo.id, e.target.value)
+      })
+    ] : [])
   ]);
 };
 
-const TodoList = () => {
+const FilterLink = (name, label) => {
+  const state = store.getState();
+  return DOM.createElement('li', {}, [
+    DOM.createElement('a', {
+      href: `#${name === 'all' ? '/' : '/' + name}`,
+      class: state.filter === name ? 'selected' : '',
+      onclick: (e) => {
+        e.preventDefault();
+        actions.setFilter(name);
+      }
+    }, [label])
+  ]);
+};
+
+const TodoApp = () => {
   const state = store.getState();
   const filteredTodos = state.todos.filter(todo => {
     switch (state.filter) {
@@ -129,121 +161,76 @@ const TodoList = () => {
     }
   });
 
-  console.log('📋 Rendering todo list, filter:', state.filter, 'count:', filteredTodos.length);
-
-  return DOM.createElement('ul', { class: 'todo-list' },
-    filteredTodos.map(todo => TodoItem(todo))
-  );
-};
-
-const TodoHeader = () => {
-  return DOM.createElement('header', { class: 'header' }, [
-    DOM.createElement('h1', {}, ['todos']),
-    DOM.createElement('input', {
-      class: 'new-todo',
-      placeholder: 'What needs to be done?',
-      onkeydown: (e) => {
-        if (e.key === 'Enter') {
-          const text = e.target.value.trim();
-          if (text) {
-            actions.addTodo(text);
-            e.target.value = '';
-          }
-        }
-      }
-    })
-  ]);
-};
-
-const TodoFooter = () => {
-  const state = store.getState();
   const activeCount = state.todos.filter(todo => !todo.completed).length;
   const completedCount = state.todos.length - activeCount;
 
-  if (state.todos.length === 0) return null;
+  return DOM.createElement('div', { class: 'todoapp' }, [
+    // Header
+    DOM.createElement('header', { class: 'header' }, [
+      DOM.createElement('h1', {}, ['todos']),
+      DOM.createElement('input', {
+        class: 'new-todo',
+        placeholder: 'What needs to be done?',
+        onkeydown: (e) => {
+          if (e.key === 'Enter') {
+            actions.addTodo(e.target.value);
+            e.target.value = '';
+          }
+        }
+      })
+    ]),
 
-  return DOM.createElement('footer', { class: 'footer' }, [
-    DOM.createElement('span', { class: 'todo-count' }, [
-      DOM.createElement('strong', {}, [activeCount.toString()]),
-      ` item${activeCount !== 1 ? 's' : ''} left`
-    ]),
-    
-    DOM.createElement('ul', { class: 'filters' }, [
-      DOM.createElement('li', {}, [
-        DOM.createElement('a', {
-          href: '#/',
-          class: state.filter === 'all' ? 'selected' : '',
-          onclick: (e) => {
-            e.preventDefault();
-            actions.setFilter('all');
-          }
-        }, ['All'])
-      ]),
-      DOM.createElement('li', {}, [
-        DOM.createElement('a', {
-          href: '#/active',
-          class: state.filter === 'active' ? 'selected' : '',
-          onclick: (e) => {
-            e.preventDefault();
-            actions.setFilter('active');
-          }
-        }, ['Active'])
-      ]),
-      DOM.createElement('li', {}, [
-        DOM.createElement('a', {
-          href: '#/completed',
-          class: state.filter === 'completed' ? 'selected' : '',
-          onclick: (e) => {
-            e.preventDefault();
-            actions.setFilter('completed');
-          }
-        }, ['Completed'])
+    // Main
+    ...(state.todos.length > 0 ? [
+      DOM.createElement('section', { class: 'main' }, [
+        DOM.createElement('ul', { class: 'todo-list' },
+          filteredTodos.map(todo => TodoItem(todo))
+        )
       ])
-    ]),
-    
-    ...(completedCount > 0 ? [
-      DOM.createElement('button', {
-        class: 'clear-completed',
-        onclick: () => actions.clearCompleted()
-      }, ['Clear completed'])
+    ] : []),
+
+    // Footer
+    ...(state.todos.length > 0 ? [
+      DOM.createElement('footer', { class: 'footer' }, [
+        DOM.createElement('span', { class: 'todo-count' }, [
+          DOM.createElement('strong', {}, [activeCount.toString()]),
+          ` item${activeCount !== 1 ? 's' : ''} left`
+        ]),
+        
+        DOM.createElement('ul', { class: 'filters' }, [
+          FilterLink('all', 'All'),
+          FilterLink('active', 'Active'),
+          FilterLink('completed', 'Completed')
+        ]),
+        
+        ...(completedCount > 0 ? [
+          DOM.createElement('button', {
+            class: 'clear-completed',
+            onclick: () => actions.clearCompleted()
+          }, ['Clear completed'])
+        ] : [])
+      ])
     ] : [])
   ]);
 };
 
-const TodoMain = () => {
-  return DOM.createElement('section', { class: 'main' }, [
-    TodoList()
-  ]);
-};
-
-const TodoApp = () => {
-  const state = store.getState();
-  
-  console.log('🎨 Rendering TodoApp with state:', state);
-  
-  return DOM.createElement('div', { class: 'todoapp' }, [
-    TodoHeader(),
-    TodoMain(),
-    TodoFooter()
-  ].filter(Boolean));
-};
-
-// Render function
+// Render
 const render = () => {
-  console.log('🎯 Rendering app...');
-  const app = document.getElementById('app');
-  if (app) {
-    DOM.render(TodoApp(), app);
-  }
+  DOM.render(TodoApp(), document.getElementById('app'));
 };
 
-// Subscribe to state changes
+// Subscribe and auto-focus edit input
 store.subscribe((state) => {
-  console.log('🔄 State changed:', state);
   render();
+  if (state.editingId) {
+    setTimeout(() => {
+      const editInput = document.querySelector('.edit');
+      if (editInput) {
+        editInput.focus();
+        editInput.select();
+      }
+    }, 0);
+  }
 });
 
-// Initial render
 render();
-
-console.log('✅ TodoMVC initialized successfully!');
