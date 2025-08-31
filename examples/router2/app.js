@@ -1,15 +1,26 @@
-import { DOM } from '../../src/index.js';
+import { App } from '../../src/index.js';
 
-function App() {
-  return DOM.createElement('div', {
-  }, [
-    DOM.createElement('h1', { 
-    }, [' Home Page']),
+// Create a new app instance
+const app = new App();
+
+// Basic route: /ali
+app.route('/ali', (state, framework) => {
+  return framework.h('h1', {}, [framework.text('Hi Ali')]);
+});
+
+app.route('/yousif', (state, framework) => {
+  return framework.h('h1', {}, [framework.text('Hi Yousif')]);
+});
+
+// Home route
+app.route('/', (state, framework) => {
+  return framework.h('div', {}, [
+    framework.h('h1', {}, [framework.text('Home Page')]),
+    framework.h('a', { href: '#/ali' }, [framework.text('Go to Ali')]),
+    framework.h('br', {}, []),
+    framework.h('a', { href: '#/yousif' }, [framework.text('Go to Yousif')])
   ]);
-}
+});
 
-const render = () => {
-  DOM.render(App(), document.getElementById('app'));
-};
-
-render();
+// Start the app
+app.start('app');

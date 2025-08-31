@@ -12,6 +12,75 @@ export const DOM = {
   render: MiniFramework.renderToDOM
 };
 
+// Simple App class for easy routing
+export class App {
+  constructor() {
+    this.routes = {};
+    this.state = {};
+    this.framework = {
+      h: (tag, attrs = {}, children = []) => {
+        if (!Array.isArray(children)) children = [children];
+        return MiniFramework.createVirtualNode(tag, attrs, children);
+      },
+      text: (content) => String(content),
+      createElement: (tag, attrs = {}, children = []) => {
+        if (!Array.isArray(children)) children = [children];
+        return MiniFramework.createVirtualNode(tag, attrs, children);
+      }
+    };
+  }
+
+  // Simple route method
+  route(path, handler) {
+    this.routes[path] = handler;
+    return this;
+  }
+
+  // Start the app
+  start(containerId = 'app') {
+    // Setup routing with custom event system
+    if (window.MiniEvents) {
+      MiniEvents.addEvent(window, 'hashchange', () => this.handleRoute(containerId));
+      MiniEvents.addEvent(window, 'load', () => this.handleRoute(containerId));
+    } else {
+      window.onhashchange = () => this.handleRoute(containerId);
+      window.onload = () => this.handleRoute(containerId);
+    }
+    
+    // Initial route
+    this.handleRoute(containerId);
+  }
+
+  handleRoute(containerId) {
+    const path = window.location.hash.slice(1) || '/';
+    const handler = this.routes[path];
+    
+    if (handler) {
+      const component = handler(this.state, this.framework);
+      const container = document.getElementById(containerId);
+      
+      if (container && component) {
+        MiniFramework.renderToDOM(component, container);
+      }
+    } else {
+      // Simple 404
+      const container = document.getElementById(containerId);
+      if (container) {
+        const notFound = this.framework.h('div', { style: 'text-align: center; color: white; padding: 40px;' }, [
+          this.framework.h('h1', { style: 'color: #ff6b6b; margin-bottom: 20px;' }, [this.framework.text('404')]),
+          this.framework.h('p', {}, [this.framework.text(`Route "${path}" not found`)])
+        ]);
+        MiniFramework.renderToDOM(notFound, container);
+      }
+    }
+  }
+
+  // Navigate to a route
+  navigate(path) {
+    window.location.hash = path;
+  }
+}
+
 // State Management
 export class Store {
   constructor(initialState = {}, persistenceKey = null) {
@@ -114,6 +183,7 @@ export { Router };
 // Main Framework Export
 export default {
   DOM,
+  App,
   Store,
   Router,
   Events,
@@ -124,6 +194,7 @@ export default {
 if (typeof window !== 'undefined') {
   window.LightFrame = {
     DOM,
+    App,
     Store,
     Router,
     Events,
