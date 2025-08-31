@@ -13,8 +13,8 @@ class Router {
     stateStore = store;
     
     // Initialize state with routing info
-    if (stateStore) {
-      stateStore.updateState({
+    if (stateStore && stateStore.setState) {
+      stateStore.setState({
         currentRoute: '/',
         routeParams: {},
         isLoading: false
@@ -40,9 +40,9 @@ class Router {
     const hash = window.location.hash.slice(1) || '/';
     const { route, params } = this.matchRoute(hash);
     
-    // Update state with new route info
-    if (stateStore) {
-      stateStore.updateState({
+    // Update state with new route info - FIX: use setState instead of updateState
+    if (stateStore && stateStore.setState) {
+      stateStore.setState({
         currentRoute: hash,
         routeParams: params,
         isLoading: false,
@@ -113,9 +113,9 @@ class Router {
   }
   
   navigate(path) {
-    // Update state before navigation
-    if (stateStore) {
-      stateStore.updateState({
+    // Update state before navigation - FIX: use setState instead of updateState
+    if (stateStore && stateStore.setState) {
+      stateStore.setState({
         isLoading: true
       });
     }
@@ -145,10 +145,80 @@ class Router {
   }
 }
 
+// Simple App class with routing - moved here from framework.js
+class App {
+  constructor() {
+    this.routes = {};
+    this.state = {};
+    this.framework = {
+      h: (tag, attrs = {}, children = []) => {
+        if (!Array.isArray(children)) children = [children];
+        return window.MiniFramework.createVirtualNode(tag, attrs, children);
+      },
+      text: (content) => String(content),
+      createElement: (tag, attrs = {}, children = []) => {
+        if (!Array.isArray(children)) children = [children];
+        return window.MiniFramework.createVirtualNode(tag, attrs, children);
+      }
+    };
+  }
+
+  // Simple route method
+  route(path, handler) {
+    this.routes[path] = handler;
+    return this;
+  }
+
+  // Start the app
+  start(containerId = 'app') {
+    // Setup routing with custom event system
+    if (window.MiniEvents) {
+      MiniEvents.addEvent(window, 'hashchange', () => this.handleRoute(containerId));
+      MiniEvents.addEvent(window, 'load', () => this.handleRoute(containerId));
+    } else {
+      window.onhashchange = () => this.handleRoute(containerId);
+      window.onload = () => this.handleRoute(containerId);
+    }
+    
+    // Initial route
+    this.handleRoute(containerId);
+  }
+
+  handleRoute(containerId) {
+    const path = window.location.hash.slice(1) || '/';
+    const handler = this.routes[path];
+    
+    if (handler) {
+      const component = handler(this.state, this.framework);
+      const container = document.getElementById(containerId);
+      
+      if (container && component) {
+        window.MiniFramework.renderToDOM(component, container);
+      }
+    } else {
+      // Simple 404
+      const container = document.getElementById(containerId);
+      if (container) {
+        const notFound = this.framework.h('div', {}, [
+          this.framework.h('h1', {}, [this.framework.text('404')]),
+          this.framework.h('p', {}, [this.framework.text(`Route "${path}" not found`)])
+        ]);
+        window.MiniFramework.renderToDOM(notFound, container);
+      }
+    }
+  }
+
+  // Navigate to a route
+  navigate(path) {
+    window.location.hash = path;
+  }
+}
+
 // Export
 if (typeof window !== 'undefined') {
   window.Router = Router;
-  window.MiniRouter = { Router };
+  window.App = App;
+  window.MiniRouter = { Router, App };
 }
 
-export { Router };
+export { Router, App  };

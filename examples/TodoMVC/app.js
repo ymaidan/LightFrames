@@ -1,96 +1,48 @@
-import { DOM, Store, Router, Events, NotFoundComponent } from '../../src/index.js';
+import { DOM, Store } from '../../src/index.js';
 
-console.log('🚀 TodoMVC Starting with LightFrame...');
+console.log('🚀 TodoMVC Starting with Simple Routing...');
 
-// Clear any old localStorage data with different keys
-['todoMVC-glassmorphism', 'todoMVC-data'].forEach(key => {
-  if (localStorage.getItem(key)) {
-    console.log('🧹 Clearing old localStorage key:', key);
-    localStorage.removeItem(key);
-  }
-});
-
-// TodoMVC State Store with localStorage persistence
+// TodoMVC State Store
 const store = new Store({
   todos: [],
   filter: 'all',
-  nextId: 1,
-  routing: { path: '/', params: {} }
+  nextId: 1
 }, 'todoMVC-mini-framework');
 
-// Log what was loaded
 console.log('📦 Initial state:', store.getState());
-console.log('📊 Loaded todos count:', store.getState().todos.length);
 
-// Create 404 component for TodoMVC
-const TodoMVC404 = ({ requestedPath }) => {
-  console.log(`🔍 TodoMVC 404 for: ${requestedPath}`);
+// Simple hash-based routing for TodoMVC (no Router class needed)
+function handleRoute() {
+  const hash = window.location.hash.slice(1) || '/';
+  let filter;
   
-  return DOM.createElement('div', { class: 'todoapp' }, [
-    DOM.createElement('header', { class: 'header' }, [
-      DOM.createElement('h1', {}, ['todos'])
-    ]),
-    DOM.createElement('div', { class: 'not-found-container' }, [
-      DOM.createElement('div', { class: 'not-found-content' }, [
-        DOM.createElement('h2', { class: 'error-code' }, ['404']),
-        DOM.createElement('h3', { class: 'error-title' }, ['Filter Not Found']),
-        DOM.createElement('p', { class: 'error-message' }, [
-          `The filter "${requestedPath}" doesn't exist.`
-        ]),
-        DOM.createElement('div', { class: 'error-actions' }, [
-          DOM.createElement('button', {
-            class: 'filter-button',
-            onclick: () => actions.setFilter('all')
-          }, ['← Back to All']),
-          DOM.createElement('button', {
-            class: 'filter-button', 
-            onclick: () => window.location.href = '/'
-          }, ['🏠 Home'])
-        ])
-      ])
-    ])
-  ]);
-};
-
-// TodoMVC Router with 404 handling
-const router = new Router({
-  '/': 'all',
-  '/active': 'active',
-  '/completed': 'completed'
-}, TodoMVC404); // ✅ Add 404 component
-
-// Sync router with store (only update if different)
-router.subscribe((routeInfo) => {
-  const currentState = store.getState();
-  
-  // Handle 404 case
-  if (routeInfo && routeInfo.is404) {
-    console.log('🔍 404 route detected, rendering 404 component');
-    const app = document.getElementById('app');
-    if (app) {
-      DOM.render(TodoMVC404({ requestedPath: routeInfo.path }), app);
-    }
+  if (hash === '/') {
+    filter = 'all';
+  } else if (hash === '/active') {
+    filter = 'active';
+  } else if (hash === '/completed') {
+    filter = 'completed';
+  } else {
+    // Invalid filter - redirect to all
+    window.location.hash = '/';
     return;
   }
   
-  // Handle normal routes
-  const filter = typeof routeInfo === 'string' ? routeInfo : 
-                 (routeInfo && routeInfo.component) || 'all';
-                 
+  // Update filter if different
+  const currentState = store.getState();
   if (currentState.filter !== filter) {
-    console.log('🔄 Router changed to:', filter);
+    console.log('🔄 Route changed to filter:', filter);
     store.setState({ filter });
   }
-});
+}
 
-// Initialize filter from URL (only if different)
-const initialRoute = router.getCurrentRoute();
-const initialFilter = typeof initialRoute === 'string' ? initialRoute : 
-                     (initialRoute && initialRoute.component) || 'all';
-                     
-if (store.getState().filter !== initialFilter) {
-  console.log('🔄 Setting initial filter to:', initialFilter);
-  store.setState({ filter: initialFilter });
+// Setup simple routing
+if (window.MiniEvents) {
+  MiniEvents.addEvent(window, 'hashchange', handleRoute);
+  MiniEvents.addEvent(window, 'load', handleRoute);
+} else {
+  window.onhashchange = handleRoute;
+  window.onload = handleRoute;
 }
 
 // TodoMVC Actions
@@ -120,7 +72,7 @@ const actions = {
     );
     
     store.setState({ todos });
-    console.log('🔄 Toggled todo:', id, 'New state:', todos.find(t => t.id === id));
+    console.log('🔄 Toggled todo:', id);
   },
 
   deleteTodo(id) {
@@ -131,75 +83,37 @@ const actions = {
     console.log('🗑️ Deleted todo:', id);
   },
 
-  toggleAll() {
-    const state = store.getState();
-    const allCompleted = state.todos.length > 0 && state.todos.every(todo => todo.completed);
-    const todos = state.todos.map(todo => ({ ...todo, completed: !allCompleted }));
-    
-    store.setState({ todos });
-    console.log('🔄 Toggled all todos, all completed was:', allCompleted);
-  },
-
   clearCompleted() {
     const state = store.getState();
     const todos = state.todos.filter(todo => !todo.completed);
     
     store.setState({ todos });
     console.log('🧹 Cleared completed todos');
-    
-    // If we're on completed view and cleared everything, go to 'all' view
-    if (state.filter === 'completed') {
-      console.log('🔄 Switching to "all" view after clearing completed');
-      actions.setFilter('all');
-    }
-  },
-
-  // Clear all data (including localStorage)
-  clearAllData() {
-    store.setState({
-      todos: [],
-      filter: 'all',
-      nextId: 1
-    });
-    console.log('🧹 Cleared all data');
   },
 
   setFilter(filter) {
     const path = filter === 'all' ? '/' : `/${filter}`;
-    console.log('🔍 Setting filter to:', filter, 'path:', path);
-    router.navigate(path);
+    console.log('🔍 Setting filter to:', filter);
+    window.location.hash = path;
   }
 };
 
 // TodoMVC Components
 const TodoItem = (todo) => {
   return DOM.createElement('li', {
-    class: todo.completed ? 'completed' : '',
-    key: todo.id,
-    'data-todo-id': todo.id
+    class: todo.completed ? 'completed' : ''
   }, [
     DOM.createElement('div', { class: 'view' }, [
       DOM.createElement('input', {
         class: 'toggle',
         type: 'checkbox',
         checked: todo.completed,
-        onclick: (e) => {
-          console.log('🔄 Checkbox clicked for todo:', todo.id, 'checked:', e.target.checked);
-          actions.toggleTodo(todo.id);
-        }
+        onclick: () => actions.toggleTodo(todo.id)
       }),
-      DOM.createElement('label', {
-        ondblclick: () => {
-          console.log('📝 Double-clicked todo:', todo.id);
-          // You can add edit functionality here later
-        }
-      }, [todo.text]),
+      DOM.createElement('label', {}, [todo.text]),
       DOM.createElement('button', {
         class: 'destroy',
-        onclick: (e) => {
-          console.log('🗑️ Delete button clicked for todo:', todo.id);
-          actions.deleteTodo(todo.id);
-        }
+        onclick: () => actions.deleteTodo(todo.id)
       })
     ])
   ]);
@@ -215,7 +129,7 @@ const TodoList = () => {
     }
   });
 
-  console.log('📋 Rendering todo list, filter:', state.filter, 'filtered count:', filteredTodos.length);
+  console.log('📋 Rendering todo list, filter:', state.filter, 'count:', filteredTodos.length);
 
   return DOM.createElement('ul', { class: 'todo-list' },
     filteredTodos.map(todo => TodoItem(todo))
@@ -232,7 +146,6 @@ const TodoHeader = () => {
         if (e.key === 'Enter') {
           const text = e.target.value.trim();
           if (text) {
-            console.log('➕ Adding new todo:', text);
             actions.addTodo(text);
             e.target.value = '';
           }
@@ -247,7 +160,6 @@ const TodoFooter = () => {
   const activeCount = state.todos.filter(todo => !todo.completed).length;
   const completedCount = state.todos.length - activeCount;
 
-  // Always show footer if there are ANY todos in the entire list
   if (state.todos.length === 0) return null;
 
   return DOM.createElement('footer', { class: 'footer' }, [
@@ -263,7 +175,6 @@ const TodoFooter = () => {
           class: state.filter === 'all' ? 'selected' : '',
           onclick: (e) => {
             e.preventDefault();
-            console.log('🔗 All filter clicked');
             actions.setFilter('all');
           }
         }, ['All'])
@@ -274,7 +185,6 @@ const TodoFooter = () => {
           class: state.filter === 'active' ? 'selected' : '',
           onclick: (e) => {
             e.preventDefault();
-            console.log('🔗 Active filter clicked');
             actions.setFilter('active');
           }
         }, ['Active'])
@@ -285,7 +195,6 @@ const TodoFooter = () => {
           class: state.filter === 'completed' ? 'selected' : '',
           onclick: (e) => {
             e.preventDefault();
-            console.log('🔗 Completed filter clicked');
             actions.setFilter('completed');
           }
         }, ['Completed'])
@@ -295,32 +204,14 @@ const TodoFooter = () => {
     ...(completedCount > 0 ? [
       DOM.createElement('button', {
         class: 'clear-completed',
-        onclick: () => {
-          console.log('🧹 Clear completed clicked');
-          actions.clearCompleted();
-        }
+        onclick: () => actions.clearCompleted()
       }, ['Clear completed'])
     ] : [])
   ]);
 };
 
 const TodoMain = () => {
-  const state = store.getState();
-  
   return DOM.createElement('section', { class: 'main' }, [
-    ...(state.todos.length > 0 ? [
-      DOM.createElement('input', {
-        id: 'toggle-all',
-        class: 'toggle-all',
-        type: 'checkbox',
-        checked: state.todos.length > 0 && state.todos.every(todo => todo.completed),
-        onclick: () => {
-          console.log('🔄 Toggle all clicked');
-          actions.toggleAll();
-        }
-      }),
-      DOM.createElement('label', { for: 'toggle-all' }, ['Mark all as complete'])
-    ] : []),
     TodoList()
   ]);
 };
@@ -346,7 +237,7 @@ const render = () => {
   }
 };
 
-// Subscribe to state changes for re-rendering
+// Subscribe to state changes
 store.subscribe((state) => {
   console.log('🔄 State changed:', state);
   render();
