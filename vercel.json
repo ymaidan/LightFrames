@@ -8,6 +8,30 @@
   ],
   "routes": [
     {
+      "src": "/src/(.*)",
+      "dest": "/src/$1"
+    },
+    {
+      "src": "/examples/([^/]+)/style\\.css",
+      "dest": "/examples/$1/style.css"
+    },
+    {
+      "src": "/examples/([^/]+)/app\\.js",
+      "dest": "/examples/$1/app.js"
+    },
+    {
+      "src": "/examples/([^/]+)/index\\.html",
+      "dest": "/examples/$1/index.html"
+    },
+    {
+      "src": "/examples/([^/]+)/?$",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/$",
+      "dest": "/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/server.js"
     }
