@@ -1,164 +1,87 @@
-body {
-    background: #d4d0c8;
-    margin: 0;
-    font-family: 'Inter', Arial, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  #app {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .counter-container {
-    background: rgba(120, 120, 120, 0.45);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-radius: 64px;
-    border: 1.5px solid rgba(255, 255, 255, 0.25);
-    min-width: 480px;
-    min-height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 64px;
-    transition: box-shadow 0.3s ease;
-  }
-  
-  .counter-container:hover {
-    box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.35);
-    transform: translateY(-2px);
-  }
-  
-  .counter-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 3rem;
-    font-weight: 300;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-  .counter-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffeb3b;
-    transform: scale(1.1);
-  }
-  
-  .counter-btn:active {
-    transform: scale(0.95);
-  }
-  
-  .counter-value {
-    font-size: 3.5rem;
-    color: #fff;
-    font-family: 'Inter', Arial, sans-serif;
-    font-weight: 400;
-    min-width: 80px;
-    text-align: center;
-    letter-spacing: 2px;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    display: inline-block;
-    position: relative;
-  }
-  
-  .counter-value.animate-up {
-    animation: countUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
-  
-  .counter-value.animate-down {
-    animation: countDown 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  }
-  
-  @keyframes countUp {
-    0% {
-        transform: translateY(0) rotate(0);
-        opacity: 1;
-    }
-    50% {
-        transform: translateY(-30px) rotate(-5deg);
-        opacity: 0;
-    }
-    51% {
-        transform: translateY(30px) rotate(5deg);
-        opacity: 0;
-    }
-    100% {
-        transform: translateY(0) rotate(0);
-        opacity: 1;
-    }
-  }
-  
-  @keyframes countDown {
-    0% {
-        transform: translateY(0) rotate(0);
-        opacity: 1;
-    }
-    50% {
-        transform: translateY(30px) rotate(5deg);
-        opacity: 0;
-    }
-    51% {
-        transform: translateY(-30px) rotate(-5deg);
-        opacity: 0;
-    }
-    100% {
-        transform: translateY(0) rotate(0);
-        opacity: 1;
-    }
-  }
-  
-  .counter-container:hover .counter-value {
-    text-shadow: 0 0 20px rgba(255, 224, 102, 0.4);
-  }
+/* Basic Example Styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-  .back-nav {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-  }
+body { 
+  background: #d4d0c8; 
+  font-family: 'Inter', Arial, sans-serif; 
+  min-height: 100vh; 
+  padding: 20px; 
+}
 
-  .back-button {
-    background: rgba(120, 120, 120, 0.45);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.25);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-radius: 16px;
-    border: 1.5px solid rgba(255, 255, 255, 0.25);
-    padding: 12px 20px;
-    color: #fff;
-    font-family: 'Inter', Arial, sans-serif;
-    font-size: 0.9rem;
-    font-weight: 400;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
+.back-nav {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+}
 
-  .back-button:hover {
-    background: rgba(140, 140, 140, 0.55);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.35);
-    border-color: rgba(255, 255, 255, 0.35);
-  }
+.back-button {
+  background: rgba(120,120,120,0.45);
+  backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  color: #fff;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
 
-  .back-button:active {
-    transform: translateY(0);
-    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.25);
-  }
+.back-button:hover {
+  background: rgba(140,140,140,0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+#app {
+  max-width: 800px;
+  margin: 80px auto 20px;
+  background: rgba(120,120,120,0.45);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  padding: 40px;
+  box-shadow: 0 8px 32px rgba(31,38,135,0.25);
+  min-height: 400px;
+  color: white;
+  text-align: center;
+}
+
+/* Counter specific styles */
+.counter-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.counter-btn {
+  background: rgba(255,224,102,0.3);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  color: white;
+  padding: 15px 25px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: bold;
+}
+
+.counter-btn:hover {
+  background: rgba(255,224,102,0.5);
+  transform: scale(1.05);
+}
+
+.counter-value {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #fff;
+  min-width: 100px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
