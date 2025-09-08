@@ -10,7 +10,15 @@ app.use('/src', express.static('src'));
 app.use('/examples', express.static('examples'));
 
 // Production examples (filter out development/test folders)
-const productionExamples = ['basic', 'component-demo', 'events-demo', 'router-demo', 'TodoMVC'];
+const productionExamples = [
+  'basic', 
+  'component-demo', 
+  'events-demo', 
+  'router-demo', 
+  'TodoMVC',
+  'docs-overview',
+  'state'
+];
 
 // Get filtered examples
 const getExamples = () => {
@@ -34,7 +42,9 @@ const getExampleDescription = (name) => {
     'basic': 'Simple counter demonstrating state management',
     'component-demo': 'Reusable components with independent stores',
     'events-demo': 'Custom event system with multiple event types',
-    'router-demo': 'Hash-based routing with dynamic parameters'
+    'router-demo': 'Hash-based routing with dynamic parameters',
+    'docs-overview': 'Complete API reference and framework guide',
+    'state': 'State management patterns and examples'
   };
   return descriptions[name] || 'Framework demonstration';
 };
