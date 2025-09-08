@@ -8,12 +8,44 @@
   ],
   "routes": [
     {
-      "src": "/src/(.*)",
-      "dest": "/src/$1"
+      "src": "/src/core.js",
+      "dest": "/src/core.js"
     },
     {
-      "src": "/examples/([^/]+)/(style\\.css|app\\.js|index\\.html)",
-      "dest": "/examples/$1/$2"
+      "src": "/src/events.js", 
+      "dest": "/src/events.js"
+    },
+    {
+      "src": "/src/state.js",
+      "dest": "/src/state.js"
+    },
+    {
+      "src": "/src/router.js",
+      "dest": "/src/router.js"
+    },
+    {
+      "src": "/src/component.js",
+      "dest": "/src/component.js"
+    },
+    {
+      "src": "/src/framework.js",
+      "dest": "/src/framework.js"
+    },
+    {
+      "src": "/src/404.js",
+      "dest": "/src/404.js"
+    },
+    {
+      "src": "/examples/([^/]+)/style.css",
+      "dest": "/examples/$1/style.css"
+    },
+    {
+      "src": "/examples/([^/]+)/app.js",
+      "dest": "/examples/$1/app.js"
+    },
+    {
+      "src": "/examples/([^/]+)/index.html",
+      "dest": "/examples/$1/index.html"
     },
     {
       "src": "/examples/([^/]+)/?$",
