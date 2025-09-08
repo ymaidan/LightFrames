@@ -1,36 +1,39 @@
 {
   "name": "mini-framework",
   "version": "1.0.0",
-  "description": "A custom JavaScript framework with DOM abstraction, state management, routing, and event handling",
+  "description": "A production-ready custom JavaScript framework with Virtual DOM, state management, routing, and custom event handling",
   "main": "server.js",
   "directories": {
     "doc": "docs",
-    "example": "examples",
-    "test": "tests"
+    "example": "examples"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js --watch src --watch examples --watch docs",
-    "examples": "node examples.js",
-    "serve": "npm start",
-    "basic": "node examples.js basic",
+    "dev": "nodemon server.js --watch src --watch examples",
     "todomvc": "node examples.js TodoMVC",
+    "basic": "node examples.js basic",
     "components": "node examples.js component-demo",
     "events": "node examples.js events-demo",
-    "router": "node examples.js router-demo",
-    "list-examples": "node -e \"console.log('Available examples:'); require('fs').readdirSync('./examples').forEach(e => console.log('  -', e))\""
+    "router": "node examples.js router-demo"
   },
-  "keywords": ["framework", "javascript", "dom", "state-management", "routing", "events"],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "framework", 
+    "javascript", 
+    "virtual-dom", 
+    "state-management", 
+    "routing", 
+    "events",
+    "todomvc"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
     "express": "^4.18.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
-  },
-  "bin": {
-    "mini-examples": "./examples.js"
   }
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Component Demo - Mini Framework</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="back-nav">
+    <button class="back-button" onclick="window.location.href='/'">← Back to Examples</button>
+  </div>
+  
+  <div id="app"></div>
+  
+  <!-- Load framework files -->
+  <script src="../../src/core.js"></script>
+  <script src="../../src/events.js"></script>
+  <script src="../../src/state.js"></script>
+  <script src="../../src/router.js"></script>
+  <script src="../../src/component.js"></script>
+  <script src="../../src/framework.js"></script>
+  <script src="../../src/404.js"></script>
+  
+  <!-- Load app as ES6 module -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

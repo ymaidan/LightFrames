@@ -5,18 +5,26 @@ const store = new Store({
   todos: [],
   filter: 'all',
   nextId: 1,
-  editingId: null
+  editingId: null,
+  showNotFound: false
 }, 'todoMVC-mini-framework');
 
-// Simple routing
+// Clean routing - removed Abdeen
 function handleRoute() {
   const hash = window.location.hash.slice(1) || '/';
   const filter = hash === '/' ? 'all' : hash.slice(1);
   
   if (['all', 'active', 'completed'].includes(filter)) {
-    store.setState({ filter });
+    // Valid filter - show TodoMVC
+    store.setState({ 
+      filter,
+      showNotFound: false 
+    });
   } else {
-    window.location.hash = '/';
+    // Invalid route - show 404
+    store.setState({ 
+      showNotFound: true 
+    });
   }
 }
 
@@ -151,8 +159,42 @@ const FilterLink = (name, label) => {
   ]);
 };
 
-const TodoApp = () => {
+// 404 Component
+const TodoNotFound = () => {
+  const requestedPath = window.location.hash || '/';
+  
+  return DOM.createElement('div', { 
+    class: 'todoapp',
+    style: 'text-align: center; padding: 40px;' 
+  }, [
+    DOM.createElement('h1', { 
+      style: 'font-size: 3rem; color: #ff6b6b; margin-bottom: 20px;' 
+    }, ['404']),
+    DOM.createElement('p', { 
+      style: 'margin-bottom: 20px; color: #666;' 
+    }, [`Route "${requestedPath}" not found`]),
+    DOM.createElement('p', { 
+      style: 'margin-bottom: 30px; color: #999;' 
+    }, ['Valid filters are: all, active, completed']),
+    DOM.createElement('button', {
+      style: 'background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-size: 16px;',
+      onclick: () => {
+        window.location.hash = '/';
+      }
+    }, ['← Back to Todos'])
+  ]);
+};
+
+// Main App Component - Clean version
+const MainApp = () => {
   const state = store.getState();
+  
+  // Show 404 for invalid routes
+  if (state.showNotFound) {
+    return TodoNotFound();
+  }
+  
+  // Show TodoMVC
   const filteredTodos = state.todos.filter(todo => {
     switch (state.filter) {
       case 'active': return !todo.completed;
@@ -216,13 +258,13 @@ const TodoApp = () => {
 
 // Render
 const render = () => {
-  DOM.render(TodoApp(), document.getElementById('app'));
+  DOM.render(MainApp(), document.getElementById('app'));
 };
 
 // Subscribe and auto-focus edit input
 store.subscribe((state) => {
   render();
-  if (state.editingId) {
+  if (state.editingId && !state.showNotFound) {
     setTimeout(() => {
       const editInput = document.querySelector('.edit');
       if (editInput) {

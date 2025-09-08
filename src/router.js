@@ -29,7 +29,7 @@ class Router {
     if (window.MiniEvents) {
       MiniEvents.addEvent(window, 'hashchange', () => this.handleRoute());
       MiniEvents.addEvent(window, 'load', () => this.handleRoute());
-    } else {
+      } else {
       // Fallback to direct assignment
       window.onhashchange = () => this.handleRoute();
       window.onload = () => this.handleRoute();
@@ -44,7 +44,7 @@ class Router {
     if (stateStore && stateStore.setState) {
       stateStore.setState({
         currentRoute: hash,
-        routeParams: params,
+      routeParams: params,
         isLoading: false,
         route404: !route
       });
@@ -168,7 +168,7 @@ class App {
     this.routes[path] = handler;
     return this;
   }
-
+  
   // Start the app
   start(containerId = 'app') {
     // Setup routing with custom event system

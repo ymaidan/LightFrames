@@ -1,4 +1,14 @@
 node_modules
 .git
-*.log
-.DS_Store
+examples/abdeen
+examples/check
+examples/count1
+examples/docs-overview
+examples/manual-routing
+examples/prac
+examples/router-calss
+examples/router2
+examples/st
+examples/state
+examples/te
+examples/test
