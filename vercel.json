@@ -32,6 +32,10 @@
       "dest": "/src/framework.js"
     },
     {
+      "src": "/src/index.js",
+      "dest": "/src/index.js"
+    },
+    {
       "src": "/src/404.js",
       "dest": "/src/404.js"
     },
