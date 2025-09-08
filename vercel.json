@@ -8,8 +8,36 @@
   ],
   "routes": [
     {
-      "src": "/src/(.*)",
-      "dest": "/src/$1"
+      "src": "/src/core.js",
+      "dest": "/src/core.js"
+    },
+    {
+      "src": "/src/events.js",
+      "dest": "/src/events.js"
+    },
+    {
+      "src": "/src/state.js",
+      "dest": "/src/state.js"
+    },
+    {
+      "src": "/src/router.js",
+      "dest": "/src/router.js"
+    },
+    {
+      "src": "/src/component.js",
+      "dest": "/src/component.js"
+    },
+    {
+      "src": "/src/framework.js",
+      "dest": "/src/framework.js"
+    },
+    {
+      "src": "/src/index.js",
+      "dest": "/src/index.js"
+    },
+    {
+      "src": "/src/404.js",
+      "dest": "/src/404.js"
     },
     {
       "src": "/examples/([^/]+)/style.css",
